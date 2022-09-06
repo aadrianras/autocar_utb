@@ -1,17 +1,14 @@
-import BottomNavigation from '@mui/material/BottomNavigation';
-import BottomNavigationAction from '@mui/material/BottomNavigationAction';
+import { Typography } from '@mui/material';
+import { useRouter } from 'next/router';
 import Box from '@mui/material/Box';
-import Stack from '@mui/material/Stack';
+import CarRepairIcon from '@mui/icons-material/CarRepair';
 import Grid from '@mui/material/Unstable_Grid2';
+import GroupsIcon from '@mui/icons-material/Groups';
 import Image from 'next/image';
 import InventoryIcon from '@mui/icons-material/Inventory';
-import ReceiptIcon from '@mui/icons-material/Receipt';
-import CarRepairIcon from '@mui/icons-material/CarRepair';
-import GroupsIcon from '@mui/icons-material/Groups';
-import { useState } from 'react';
-import { Typography } from '@mui/material';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
+import ReceiptIcon from '@mui/icons-material/Receipt';
+import Stack from '@mui/material/Stack';
 
 const MenuLayout = ({ children }: { children: JSX.Element }) => {
   const router = useRouter();
@@ -19,7 +16,7 @@ const MenuLayout = ({ children }: { children: JSX.Element }) => {
   return (
     <Grid height="100%" width="100%" bgcolor="secondary" container>
       <Grid width="60px" height="100%" bgcolor="primary.main">
-        <Stack justifyContent="space-between" gap="1rem">
+        <Stack justifyContent="space-between" gap="2rem">
           <Box m="1rem auto 0rem auto" maxWidth="3rem">
             <Image
               src="/images/logo.png"
@@ -39,7 +36,7 @@ const MenuLayout = ({ children }: { children: JSX.Element }) => {
                       textAlign="center"
                       alignItems="center"
                       sx={{
-                        backgroundColor: router.pathname === page.url ? 'secondary.main' : 'transparent',
+                        backgroundColor: router.pathname.includes(page.url) ? 'secondary.main' : 'transparent',
                         padding: '.25rem',
                         borderRadius: '.25rem',
                       }}
