@@ -1,6 +1,8 @@
 import InventoryHeader from "../../../components/Inventory/Header";
-import ProviderTable from "../../../components/Inventory/ProviderTable";
+import NewProvider from "../../../components/Inventory/Providers/NewProvider";
+import ProvidersTable from "../../../components/Inventory/Providers/ProvidersTable";
 import MenuLayout from "../../../components/MenuLayout/MenuLayout";
+
 
 
 
@@ -10,7 +12,8 @@ const Providers = () => {
       <MenuLayout>
         <>
           <InventoryHeader />
-          <ProviderTable />
+          <ProvidersTable />
+          <NewProvider />
         </>
       </MenuLayout>
     );

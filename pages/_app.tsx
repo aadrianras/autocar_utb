@@ -1,12 +1,15 @@
 import '../styles/globals.css'
-import type { AppProps } from 'next/app'
+import { createContext, Dispatch, SetStateAction, useState } from 'react'
 import { ThemeProvider } from '@mui/material'
 import lightTheme from '../theme/light'
-import { createContext, Dispatch, SetStateAction, useState } from 'react'
 import MainLayout from '../components/MainLayout/MainLayout'
+import type { AppProps } from 'next/app'
+import { Provider } from '../types/firestore'
+
 
 export interface MyContext {
   user: User | null,
+  providers: Provider[],
   snackbar: Snackbar
 }
 
@@ -30,18 +33,23 @@ export interface MyContextState {
   setMyContext: Dispatch<SetStateAction<MyContext>>
 }
 
-export const GlobalContext = createContext<MyContextState>({myContext: {
+export const GlobalContext = createContext<MyContextState>({
+  myContext: {
     user: null,
+    providers: [],
     snackbar: {
       open: false,
       msg: '',
-      severity: 'info'
+      severity: 'info',
     }
-  }, setMyContext: () => {}})
+  },
+  setMyContext: () => {},
+});
 
 function MyApp({ Component, pageProps }: AppProps) {
   const [myContext, setMyContext] = useState<MyContext>({
     user: null,
+    providers: [],
     snackbar: {
       open: false,
       msg: '',

@@ -1,5 +1,5 @@
 export interface Provider {
-  id: string;
+  id?: string;
   contactName: string;
   city: string;
   address: string;

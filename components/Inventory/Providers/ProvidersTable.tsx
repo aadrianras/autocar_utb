@@ -1,9 +1,10 @@
-import { db } from '../../config/firebase';
-import { Provider } from '../../types/firestore';
+import { db } from '../../../config/firebase';
+import { Provider } from '../../../types/firestore';
 import { useState, useEffect } from 'react';
-import { DataGrid, GridRowsProp, GridColDef } from '@mui/x-data-grid';
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { Box, Typography } from '@mui/material';
 
-const ProviderTable = () => {
+const ProvidersTable = () => {
   const [providers, setProviders] = useState<Provider[]>([]);
   useEffect(() => {
     (async () => {
@@ -14,9 +15,10 @@ const ProviderTable = () => {
   }, []);
 
   return (
-    <div>
-      <DataGrid rows={providers} columns={columns} autoHeight/>
-    </div>
+    <Box p="1rem">
+      <Typography variant="h4" mb='1rem'>Proveedores</Typography>
+      <DataGrid rows={providers} columns={columns} autoHeight />
+    </Box>
   );
 };
 
@@ -24,28 +26,28 @@ const columns: GridColDef[] = [
   {
     field: 'company',
     headerName: 'Proveedor',
-    flex: 1
+    flex: 1,
   },
   {
     field: 'contactName',
     headerName: 'Contacto',
-    flex: 1
+    flex: 1,
   },
   {
     field: 'contactPhone',
     headerName: 'Telefono',
-    flex: 1
+    flex: 1,
   },
   {
     field: 'city',
     headerName: 'Ciudad',
-    flex: .5
+    flex: 0.5,
   },
   {
     field: 'address',
     headerName: 'Direccion',
-    flex: 1
+    flex: 1,
   },
 ];
 
-export default ProviderTable;
+export default ProvidersTable;
