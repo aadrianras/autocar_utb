@@ -24,7 +24,7 @@ import 'moment/locale/es';
 
 const defaultFormValue: PurchaseOrder = {
   id: '',
-  date: new Date(Date.now()),
+  date: Date.now(),
   createdBy: '',
   providerId: '',
   orderedCars: [{ name: '', detail: '', quantity: 0, year: moment().year() }],
@@ -61,7 +61,7 @@ const NewOrder = () => {
   const handleSubmit = async () => {
     const data = {
       ...form,
-      date: new Date(Date.now()),
+      date: Date.now(),
       createdBy: myContext.user?.uid,
       orderedCars: form.orderedCars.filter((car) => car.name && car.quantity && car.year),
     };
@@ -85,7 +85,7 @@ const NewOrder = () => {
         snackbar: {
           open: true,
           severity: 'success',
-          msg: 'Orden creada correctamente.',
+          msg: 'Orden de compra creada correctamente.',
         },
       });
       //Close providers modal

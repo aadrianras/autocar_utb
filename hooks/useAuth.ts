@@ -11,10 +11,13 @@ const useAuth = async () => {
       router.push('/');
       return;
     }
-    if(user && !myContext?.user) {
+    if (user && !myContext?.user) {
       const dbUser = await fs.user.get(user?.uid);
-      const dbProviders = await fs.providers.getAll()
-      if (!dbUser || !dbProviders) throw new Error('Error while loading');
+      const dbProviders = await fs.providers.getAll();
+      const dbPurchaseOrders = await fs.purchaseOrders.getAll();
+      const dbUsers = await fs.user.getAll();
+
+      if (!dbUser || !dbProviders || !dbUsers || !dbPurchaseOrders) throw new Error('Error while loading');
       //Send authenticated user to the context
       setMyContext({
         ...myContext,
@@ -26,11 +29,13 @@ const useAuth = async () => {
           phone: dbUser?.phone || 0,
           role: dbUser?.role || 'editor',
         },
-        providers: dbProviders
+        providers: dbProviders,
+        purchaseOrders: dbPurchaseOrders,
+        users: dbUsers
       });
     }
     //This part needs to be specific for each role
-    if(user && router.pathname === '/login') {
+    if (user && router.pathname === '/login') {
       router.push('/dashboard/inventory');
     }
   });

@@ -18,7 +18,7 @@ export interface User {
 
 export interface PurchaseOrder {
   id?: string;
-  date: Date;
+  date: number;
   createdBy: string;
   providerId: string;
   orderedCars: OrderedCars[];

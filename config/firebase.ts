@@ -21,6 +21,17 @@ const db = firebase.firestore();
 
 const fs = {
   user: {
+    getAll: async function (): Promise<User[]> {
+      try {
+        const users = await (
+          await db.collection('users').get()
+        ).docs.map((doc): User => ({ uid: doc.id, ...doc.data() } as User));
+        return users;
+      } catch (error) {
+        console.log({error})
+        return []
+      }
+    },
     get: async function (uid: string): Promise<User | null> {
       try {
         const user = (await (await db.collection('users').doc(uid).get()).data()) as Partial<User>;

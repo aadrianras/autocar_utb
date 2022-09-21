@@ -10,6 +10,7 @@ export interface MyContext {
   user: User | null;
   providers: Provider[];
   purchaseOrders: PurchaseOrder[];
+  users: User[];
   snackbar: Snackbar;
 }
 
@@ -29,6 +30,7 @@ export const GlobalContext = createContext<MyContextState>({
     user: null,
     providers: [],
     purchaseOrders: [],
+    users: [],
     snackbar: {
       open: false,
       msg: '',
@@ -43,6 +45,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     user: null,
     providers: [],
     purchaseOrders: [],
+    users: [],
     snackbar: {
       open: false,
       msg: '',
