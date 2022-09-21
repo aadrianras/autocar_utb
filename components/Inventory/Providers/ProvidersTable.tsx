@@ -1,28 +1,37 @@
-import { db } from '../../../config/firebase';
-import { Provider } from '../../../types/firestore';
-import { useState, useEffect } from 'react';
+import { useContext, useState } from 'react';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { Box, Typography } from '@mui/material';
+import { Box, IconButton, Typography } from '@mui/material';
+import { GlobalContext, MyContextState } from '../../../pages/_app';
+import { Provider } from '../../../types/firestore';
+import EditRoundedIcon from '@mui/icons-material/EditRounded';
+import EditProvider from './EditProvider';
 
 const ProvidersTable = () => {
-  const [providers, setProviders] = useState<Provider[]>([]);
-  useEffect(() => {
-    (async () => {
-      const getProviders = await db.collection('providers').get();
-      const data = await getProviders.docs.map((doc): Provider => ({ id: doc.id, ...doc.data() } as Provider));
-      setProviders(data);
-    })();
-  }, []);
+  const { myContext } = useContext<MyContextState>(GlobalContext);
+  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
+  const [provider, setProvider] = useState<Provider | null>(null);
+  const handleEditProvider = (provider: Provider) => {
+    setIsEditModalOpen(true);
+    setProvider(provider);
+  };
 
   return (
-    <Box p="1rem">
-      <Typography variant="h4" mb='1rem'>Proveedores</Typography>
-      <DataGrid rows={providers} columns={columns} autoHeight />
+    <Box p="1rem 1rem 2rem 1rem" sx={{ overflowY: 'auto', height: 'calc(100% - 60px)' }}>
+      <Typography variant="h4" mb="1rem">
+        Proveedores
+      </Typography>
+      <DataGrid rows={myContext.providers} columns={getColumns(handleEditProvider)} autoHeight />
+      <EditProvider
+        isEditModalOpen={isEditModalOpen}
+        setIsEditModalOpen={setIsEditModalOpen}
+        provider={provider}
+        setProvider={setProvider}
+      />
     </Box>
   );
 };
 
-const columns: GridColDef[] = [
+const getColumns = (handleEditProvider: (provider: Provider) => void): GridColDef[] => [
   {
     field: 'company',
     headerName: 'Proveedor',
@@ -35,7 +44,12 @@ const columns: GridColDef[] = [
   },
   {
     field: 'contactPhone',
-    headerName: 'Telefono',
+    headerName: 'Teléfono',
+    flex: .5,
+  },
+  {
+    field: 'address',
+    headerName: 'Dirección',
     flex: 1,
   },
   {
@@ -44,9 +58,22 @@ const columns: GridColDef[] = [
     flex: 0.5,
   },
   {
-    field: 'address',
-    headerName: 'Direccion',
-    flex: 1,
+    field: 'edit',
+    headerName: ' ',
+    hideable: false,
+    disableColumnMenu: true,
+    hideSortIcons: true,
+    minWidth: 60,
+    width: 60,
+    renderCell({ row }: { row: Provider }) {
+      return (
+        <Box display="flex" width="100%" justifyContent="center" alignItems="center">
+          <IconButton sx={{ borderRadius: '.25rem' }} onClick={() => handleEditProvider(row)}>
+            <EditRoundedIcon />
+          </IconButton>
+        </Box>
+      );
+    },
   },
 ];
 

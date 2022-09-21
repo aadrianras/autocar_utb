@@ -1,10 +1,10 @@
-import { ChangeEvent, FormEvent, ReactElement, useContext, useEffect, useState } from 'react';
+import {  fs } from '../config/firebase';
+import { ChangeEvent, FormEvent, useContext, useEffect, useState } from 'react';
+import { GlobalContext, MyContextState } from './_app';
 import { Typography, Button, Stack, TextField, Box } from '@mui/material';
-import { auth, db } from '../config/firebase';
-import Head from 'next/head';
-import { GlobalContext, MyContextState, User } from './_app';
-import Image from 'next/image';
 import { useRouter } from 'next/router';
+import Head from 'next/head';
+import Image from 'next/image';
 
 function Login() {
   const router = useRouter()
@@ -17,15 +17,13 @@ function Login() {
     event.preventDefault();
     setLoading(true);
     try {
-      const userUID = await (await auth.signInWithEmailAndPassword(user, password))?.user?.uid;
-      const dbUser = await db.collection('users').doc(userUID).get();
-      const dataUser = (await dbUser.data()) as Partial<User>;
-      if (!dataUser) throw new Error('Error while loading');
+      const dataUser = await fs.user.login(user, password)
+      if (!dataUser) throw new Error('Error while login');
       //Send authenticated user to the context
       setMyContext({
         ...myContext,
         user: {
-          uid: userUID || '',
+          uid: dataUser.uid || '',
           job: dataUser?.job || '',
           name: dataUser?.name || '',
           lastname: dataUser?.lastname || '',
@@ -40,14 +38,17 @@ function Login() {
       })
       router.push('/dashboard/inventory')
     } catch (error) {
-      setMyContext({
-        ...myContext,
-        snackbar: {
-          open: true,
-          severity: 'error',
-          msg: 'Ocurrio un problema al iniciar tu sesión, revisa tu datos.',
-        },
-      });
+      if( error instanceof Error) {
+        setMyContext({
+          ...myContext,
+          snackbar: {
+            open: true,
+            severity: 'error',
+            msg: error.message || 'Ocurrio un problema al iniciar tu sesión, revisa tu datos.',
+          },
+        });
+
+      }
       console.log({ error });
     } finally {
       setLoading(false);

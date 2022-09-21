@@ -1,8 +1,7 @@
 import { fs } from '../../../config/firebase';
 import { GlobalContext, MyContextState } from '../../../pages/_app';
 import { Provider } from '../../../types/firestore';
-import { useState, useContext } from 'react';
-import AddIcon from '@mui/icons-material/Add';
+import { useState, useContext, Dispatch, SetStateAction, useEffect } from 'react';
 import Button from '@mui/material/Button';
 import CloseIcon from '@mui/icons-material/Close';
 import Fab from '@mui/material/Fab';
@@ -14,23 +13,47 @@ import Modal from '@mui/material/Modal';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
-import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 
-const NewProvider = () => {
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const handleClose = () => setIsModalOpen(false);
+const EditProvider = ({ isEditModalOpen, setIsEditModalOpen, provider, setProvider }: Props) => {
   const [loading, setLoading] = useState<boolean>(false);
   const { myContext, setMyContext } = useContext<MyContextState>(GlobalContext);
   const [form, setForm] = useState<Provider>({
-    id: '',
-    address: '',
-    contactName: '',
-    city: cities[0],
-    company: '',
-    contactPhone: '',
+    id: provider?.id || '',
+    address: provider?.address || '',
+    contactName: provider?.contactName || '',
+    city: provider?.city || cities[0],
+    company: provider?.company || '',
+    contactPhone: provider?.contactPhone || '',
   });
+
+  const handleClose = () => {
+    setProvider(null);
+    //Reset form
+    setForm({
+      id: '',
+      address: '',
+      contactName: '',
+      city: cities[0],
+      company: '',
+      contactPhone: '',
+    });
+    setIsEditModalOpen(false);
+  };
+
+  useEffect(() => {
+    if (provider?.id && provider?.id !== form?.id) {
+      setForm({
+        id: provider?.id || '',
+        address: provider?.address || '',
+        contactName: provider?.contactName || '',
+        city: provider?.city || cities[0],
+        company: provider?.company || '',
+        contactPhone: provider?.contactPhone || '',
+      });
+    }
+  }, [provider]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setForm((form) => ({ ...form, [event.target.name]: event.target.value }));
@@ -41,12 +64,10 @@ const NewProvider = () => {
 
   const handleSubmit = async () => {
     setLoading(true);
-    const data = { ...form };
-    delete data.id;
     try {
-      const newProvider = await fs.providers.create(data);
+      const editedProvider = await fs.providers.update(form);
       const dbProviders = await fs.providers.getAll();
-      if (!newProvider || !dbProviders) throw new Error('Error while loading');
+      if (!editedProvider || !dbProviders) throw new Error('Error while updating context');
       //Reset form
       setForm({
         id: '',
@@ -63,18 +84,19 @@ const NewProvider = () => {
         snackbar: {
           open: true,
           severity: 'success',
-          msg: 'Proveedor creado correctamente.',
+          msg: 'Proveedor actualizado correctamente.',
         },
       });
+      setProvider(null);
       //Close providers modal
-      setIsModalOpen(false);
+      setIsEditModalOpen(false);
     } catch (error) {
       setMyContext({
         ...myContext,
         snackbar: {
           open: true,
           severity: 'error',
-          msg: 'Ocurrio un problema al crear al proveedor, revisa tu datos.',
+          msg: 'Ocurrio un problema al actualizado al proveedor, revisa tu datos.',
         },
       });
     } finally {
@@ -84,18 +106,8 @@ const NewProvider = () => {
 
   return (
     <>
-      <Tooltip title="Agregar nuevo proveedor" placement="left">
-        <Fab
-          color="primary"
-          aria-label="new provider"
-          onClick={() => setIsModalOpen(true)}
-          sx={{ position: 'absolute', bottom: '2rem', right: '2rem' }}
-        >
-          <AddIcon />
-        </Fab>
-      </Tooltip>
       <Modal
-        open={isModalOpen}
+        open={isEditModalOpen && provider !== null}
         onClose={handleClose}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
@@ -114,7 +126,7 @@ const NewProvider = () => {
         >
           <Stack direction="row" justifyContent="space-between" alignItems="center">
             <Typography id="modal-modal-title" variant="h6" component="h2">
-              Nuevo proveedor
+              Editar proveedor
             </Typography>
             <IconButton aria-label="Cerrar nuevo proveedor" onClick={handleClose} sx={{ borderRadius: '.25rem' }}>
               <CloseIcon />
@@ -184,7 +196,7 @@ const NewProvider = () => {
                 </Select>
               </FormControl>
               <Button variant="contained" sx={{ marginRight: 'auto', width: '12rem' }} onClick={handleSubmit}>
-                {loading ? <CircularProgress size="1.9rem" sx={{ color: '#fff' }} /> : 'Registrar'}
+                {loading ? <CircularProgress size='1.9rem' sx={{ color: '#fff' }} /> : 'Editar'}
               </Button>
             </Stack>
           </form>
@@ -194,6 +206,13 @@ const NewProvider = () => {
   );
 };
 
+interface Props {
+  isEditModalOpen: boolean;
+  setIsEditModalOpen: Dispatch<SetStateAction<boolean>>;
+  provider: Provider | null;
+  setProvider: Dispatch<SetStateAction<Provider | null>>;
+}
+
 const cities = ['La Paz', 'Cochabamba', 'Santa Cruz'];
 
-export default NewProvider;
+export default EditProvider;

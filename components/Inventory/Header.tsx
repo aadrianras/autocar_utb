@@ -34,7 +34,7 @@ const InventoryHeader = () => {
             }}
             variant="body1"
           >
-            Compras
+            Ordenes de compra
           </Typography>
         </a>
       </Link>

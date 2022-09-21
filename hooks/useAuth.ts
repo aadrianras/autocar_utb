@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router';
 import { useContext } from 'react';
-import { auth, db } from '../config/firebase';
-import { GlobalContext, MyContextState, User } from '../pages/_app';
+import { auth, fs } from '../config/firebase';
+import { GlobalContext, MyContextState } from '../pages/_app';
 
 const useAuth = async () => {
   const router = useRouter();
@@ -12,20 +12,21 @@ const useAuth = async () => {
       return;
     }
     if(user && !myContext?.user) {
-      const dbUser = await db.collection('users').doc(user?.uid).get();
-      const dataUser = (await dbUser.data()) as Partial<User>;
-      if (!dataUser) throw new Error('Error while loading');
+      const dbUser = await fs.user.get(user?.uid);
+      const dbProviders = await fs.providers.getAll()
+      if (!dbUser || !dbProviders) throw new Error('Error while loading');
       //Send authenticated user to the context
       setMyContext({
         ...myContext,
         user: {
           uid: user?.uid || '',
-          job: dataUser?.job || '',
-          name: dataUser?.name || '',
-          lastname: dataUser?.lastname || '',
-          phone: dataUser?.phone || 0,
-          role: dataUser?.role || 'editor',
+          job: dbUser?.job || '',
+          name: dbUser?.name || '',
+          lastname: dbUser?.lastname || '',
+          phone: dbUser?.phone || 0,
+          role: dbUser?.role || 'editor',
         },
+        providers: dbProviders
       });
     }
     //This part needs to be specific for each role
