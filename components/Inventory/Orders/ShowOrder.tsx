@@ -9,7 +9,7 @@ import IconButton from '@mui/material/IconButton';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Modal from '@mui/material/Modal';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
+import Select from '@mui/material/Select';
 import FormHelperText from '@mui/material/FormHelperText';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
@@ -18,55 +18,18 @@ import moment from 'moment';
 import 'moment/locale/es';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 
-const statusOptions = [
-  { value: 'pending', label: 'Pendiente' },
-  { value: 'approved', label: 'Aprobada' },
-  { value: 'rejected', label: 'Rechazada' },
-];
-
-const EditOrder = ({ purchaseOrderId, setPurchaseOrderId }: Props) => {
-  const { myContext, setMyContext } = useContext<MyContextState>(GlobalContext);
+const ShowOrder = ({ purchaseOrderId, setPurchaseOrderId }: Props) => {
+  const { myContext } = useContext<MyContextState>(GlobalContext);
   const purchaseOrder = myContext.purchaseOrders.find((order) => order.id === purchaseOrderId);
-  const [status, setStatus] = useState<'pending' | 'rejected' | 'approved'>(purchaseOrder?.status || 'pending');
-  useEffect(() => setStatus(purchaseOrder?.status || 'pending'), [purchaseOrder])
-  const [loading, setLoading] = useState<boolean>(false);
   const handleClose = () => {
     setPurchaseOrderId(null);
   };
-
-  const handleSubmit = async (event: SelectChangeEvent) => {
-    setLoading(true);
-    const newStatus = event.target.value as 'pending';
-    try {
-      const updatedPurchaseOrder = await fs.purchaseOrders.update({ id: purchaseOrder?.id, status: newStatus });
-      const dbPurchaseOrders = await fs.purchaseOrders.getAll();
-      setStatus(newStatus);
-      if (!updatedPurchaseOrder || !dbPurchaseOrders) throw new Error('Error while getting data');
-      //Display success message
-      setMyContext({
-        ...myContext,
-        purchaseOrders: dbPurchaseOrders,
-        snackbar: {
-          open: true,
-          severity: 'success',
-          msg: 'Orden de compra actulizada correctamente.',
-        },
-      });
-      //Close modal
-      handleClose();
-    } catch (error) {
-      setMyContext({
-        ...myContext,
-        snackbar: {
-          open: true,
-          severity: 'error',
-          msg: 'Ocurrio un problema al actualizar la orden, revisa tu datos.',
-        },
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [textStatus, setTextStatus] = useState<string>('');
+  useEffect(() => {
+    if (purchaseOrder?.status === 'pending') setTextStatus('Pendiente');
+    if (purchaseOrder?.status === 'approved') setTextStatus('Aprobada');
+    if (purchaseOrder?.status === 'rejected') setTextStatus('Rechazada');
+  }, [purchaseOrder?.status]);
 
   return (
     <Modal
@@ -96,41 +59,18 @@ const EditOrder = ({ purchaseOrderId, setPurchaseOrderId }: Props) => {
             </Typography>
             <Typography variant="body1">{moment(purchaseOrder?.date).locale('es').format('LLL')}</Typography>
           </Stack>
-          <Stack direction="row" alignItems="center" gap=".5rem">
-            {loading && <CircularProgress size="2rem" />}
-            <IconButton
-              aria-label="Cerrar editar order de compra"
-              onClick={handleClose}
-              sx={{ borderRadius: '.25rem' }}
-            >
-              <CloseIcon />
-            </IconButton>
-          </Stack>
+          <IconButton aria-label="Cerrar editar order de compra" onClick={handleClose} sx={{ borderRadius: '.25rem' }}>
+            <CloseIcon />
+          </IconButton>
         </Stack>
         <Stack alignItems="stretch" gap="1rem">
           <Stack direction="row" justifyContent="space-between" alignItems="flex-start" gap={1}>
             <Typography variant="h5" sx={{ flex: '1 1 50%' }}>
               {myContext.providers.find((provider) => provider.id === purchaseOrder?.providerId)?.company}
             </Typography>
-            <FormControl size="small" sx={{ flex: '1 1 50%' }}>
-              <InputLabel id="purchase-order-status-label-id">Estado</InputLabel>
-              <Select
-                disabled={loading}
-                name="status"
-                labelId="purchase-order-status-label-id"
-                id="purchase-order-status-id"
-                value={statusOptions.find((option) => option.value === status)?.value}
-                label="Estado"
-                onChange={handleSubmit}
-              >
-                {statusOptions.map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </Select>
-              <FormHelperText>Selecciona el estado de la order</FormHelperText>
-            </FormControl>
+            <Typography variant="h5" sx={{ flex: '1 1 50%' }}>
+              {`Estado: ${textStatus}`}
+            </Typography>
           </Stack>
           <DataGrid
             rows={purchaseOrder?.orderedCars || []}
@@ -173,4 +113,4 @@ interface Props {
   setPurchaseOrderId: Dispatch<SetStateAction<string | null>>;
 }
 
-export default EditOrder;
+export default ShowOrder;

@@ -2,16 +2,18 @@ import 'moment/locale/es';
 import { Box, IconButton, Typography } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { GlobalContext, MyContextState } from '../../../pages/_app';
-import { Provider, PurchaseOrder } from '../../../types/firestore';
+import { PurchaseOrder } from '../../../types/firestore';
 import { useContext, useState, useEffect } from 'react';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import moment from 'moment';
 import EditOrder from './EditOrder';
 import { DataTablePurchaseOrder } from '../../../types/PurchaseOrder';
+import ShowOrder from './ShowOrder';
 
 const OrdersTable = () => {
   const { myContext } = useContext<MyContextState>(GlobalContext);
   const [purchaseOrderId, setPurchaseOrderId] = useState<string | null>(null);
+  const [purchaseOrderIdShow, setPurchaseOrderIdShow] = useState<string | null>(null);
   const [dataPurchaseOrders, setDataPurchaseOrders] = useState<DataTablePurchaseOrder[]>([]);
   const handleEditPurchaseOrder = (order: DataTablePurchaseOrder) => {
     setPurchaseOrderId(order.id);
@@ -42,9 +44,11 @@ const OrdersTable = () => {
       <DataGrid
         rows={dataPurchaseOrders}
         columns={getColumns(handleEditPurchaseOrder, myContext?.user?.role)}
+        onRowClick={((params) => setPurchaseOrderIdShow(params.row.id))}
         autoHeight
       />
       <EditOrder purchaseOrderId={purchaseOrderId} setPurchaseOrderId={setPurchaseOrderId} />
+      <ShowOrder purchaseOrderId={purchaseOrderIdShow} setPurchaseOrderId={setPurchaseOrderIdShow} />
     </Box>
   );
 };
