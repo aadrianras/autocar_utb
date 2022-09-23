@@ -13,7 +13,6 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 import FormHelperText from '@mui/material/FormHelperText';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import Grid from '@mui/material/Unstable_Grid2';
 import CircularProgress from '@mui/material/CircularProgress';
 import moment from 'moment';
 import 'moment/locale/es';
@@ -28,17 +27,17 @@ const statusOptions = [
 const EditOrder = ({ purchaseOrderId, setPurchaseOrderId }: Props) => {
   const { myContext, setMyContext } = useContext<MyContextState>(GlobalContext);
   const purchaseOrder = myContext.purchaseOrders.find((order) => order.id === purchaseOrderId);
-  const [status, setStatus] = useState<'pending' | 'rejected' | 'approved'>(purchaseOrder?.status || 'pending');
+  const [status, setStatus] = useState<'pending' | 'rejected' | 'approved' | undefined>(purchaseOrder?.status);
   const handleClose = () => {
     setPurchaseOrderId(null);
   };
   const [loading, setLoading] = useState<boolean>(false);
-  
+
   const handleSubmit = async (event: SelectChangeEvent) => {
     setLoading(true);
-    const newStatus = event.target.value as 'pending'
+    const newStatus = event.target.value as 'pending';
     try {
-      const updatedPurchaseOrder = await fs.purchaseOrders.update({id: purchaseOrder?.id, status: newStatus});
+      const updatedPurchaseOrder = await fs.purchaseOrders.update({ id: purchaseOrder?.id, status: newStatus });
       const dbPurchaseOrders = await fs.purchaseOrders.getAll();
       setStatus(newStatus);
       if (!updatedPurchaseOrder || !dbPurchaseOrders) throw new Error('Error while getting data');
@@ -90,14 +89,21 @@ const EditOrder = ({ purchaseOrderId, setPurchaseOrderId }: Props) => {
         }}
       >
         <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Typography id="modal-modal-title" variant="h6" component="h2">
-            {`Orden de compra # ${purchaseOrder?.id}`}
-          </Typography>
-          <Stack direction='row' alignItems='center' gap='.5rem'>
-          {loading && <CircularProgress size='2rem'/>}
-          <IconButton aria-label="Cerrar editar order de compra" onClick={handleClose} sx={{ borderRadius: '.25rem' }}>
-            <CloseIcon />
-          </IconButton>
+          <Stack>
+            <Typography id="modal-modal-title" variant="h6" component="h2">
+              {`Orden de compra # ${purchaseOrder?.id}`}
+            </Typography>
+            <Typography variant="body1">{moment(purchaseOrder?.date).locale('es').format('LLL')}</Typography>
+          </Stack>
+          <Stack direction="row" alignItems="center" gap=".5rem">
+            {loading && <CircularProgress size="2rem" />}
+            <IconButton
+              aria-label="Cerrar editar order de compra"
+              onClick={handleClose}
+              sx={{ borderRadius: '.25rem' }}
+            >
+              <CloseIcon />
+            </IconButton>
           </Stack>
         </Stack>
         <Stack alignItems="stretch" gap="1rem">
@@ -109,7 +115,7 @@ const EditOrder = ({ purchaseOrderId, setPurchaseOrderId }: Props) => {
               <InputLabel id="purchase-order-status-label-id">Estado</InputLabel>
               <Select
                 disabled={loading}
-                name='status'
+                name="status"
                 labelId="purchase-order-status-label-id"
                 id="purchase-order-status-id"
                 value={statusOptions.find((option) => option.value === status)?.value}

@@ -34,23 +34,25 @@ const OrdersTable = () => {
     setDataPurchaseOrders(formatedData);
   }, [myContext]);
 
-  console.log({ myContext });
-
   return (
     <Box p="1rem 1rem 2rem 1rem" sx={{ overflowY: 'auto', height: 'calc(100% - 60px)' }}>
       <Typography variant="h4" mb="1rem">
         Ordenes de compra
       </Typography>
-      <DataGrid rows={dataPurchaseOrders} columns={getColumns(handleEditPurchaseOrder)} autoHeight />
-      <EditOrder
-        purchaseOrderId={purchaseOrderId}
-        setPurchaseOrderId={setPurchaseOrderId}
+      <DataGrid
+        rows={dataPurchaseOrders}
+        columns={getColumns(handleEditPurchaseOrder, myContext?.user?.role)}
+        autoHeight
       />
+      <EditOrder purchaseOrderId={purchaseOrderId} setPurchaseOrderId={setPurchaseOrderId} />
     </Box>
   );
 };
 
-const getColumns = (handleEditPurchaseOrder: (order: DataTablePurchaseOrder) => void): GridColDef[] => [
+const getColumns = (
+  handleEditPurchaseOrder: (order: DataTablePurchaseOrder) => void,
+  role: 'admin' | 'editor' | undefined
+): GridColDef[] => [
   {
     field: 'id',
     headerName: 'Id',
@@ -115,6 +117,7 @@ const getColumns = (handleEditPurchaseOrder: (order: DataTablePurchaseOrder) => 
     minWidth: 60,
     width: 60,
     renderCell({ row }: { row: DataTablePurchaseOrder }) {
+      if(role === 'editor') return
       return (
         <Box display="flex" width="100%" justifyContent="center" alignItems="center">
           <IconButton sx={{ borderRadius: '.25rem' }} onClick={() => handleEditPurchaseOrder(row)}>
@@ -125,7 +128,5 @@ const getColumns = (handleEditPurchaseOrder: (order: DataTablePurchaseOrder) => 
     },
   },
 ];
-
-
 
 export default OrdersTable;
