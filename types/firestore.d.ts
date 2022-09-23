@@ -5,7 +5,7 @@ export type Provider = {
   address: string;
   company: string;
   contactPhone: string;
-}
+};
 
 export interface User {
   uid: string;
@@ -22,7 +22,7 @@ export interface PurchaseOrder {
   createdBy: string;
   providerId: string;
   orderedCars: OrderedCar[];
-  status: 'pending' | 'rejected' | 'approved'
+  status: 'pending' | 'rejected' | 'approved';
 }
 
 export interface OrderedCar {
@@ -37,7 +37,13 @@ export interface ReceptionOrder {
   date: number;
   createdBy: string;
   providerId: string;
-  cars: Car[];
+  cars?: Car[];
+  stock?: Stock[];
+}
+
+export interface Stock {
+  carId: string;
+  quantity: number;
 }
 
 export interface Car {

@@ -173,6 +173,16 @@ const fs = {
         return [];
       }
     },
+    update: async function (id: string, data: Partial<Car>): Promise<Car | null> {
+      try {
+        const updatedCar = await db.collection('cars').doc(id).update(data);
+        const updatedOrderCar = await updatedCar;
+        return { id: updatedOrderCar, ...data } as Car;
+      } catch (error) {
+        console.log({ error });
+        return null;
+      }
+    },
   }
 };
 

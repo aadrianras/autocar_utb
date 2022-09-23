@@ -43,7 +43,7 @@ const ShowOrder = ({ receptionOrderId, setReceptionOrderId }: Props) => {
         <Stack direction="row" justifyContent="space-between" alignItems="center">
           <Stack>
             <Typography id="modal-modal-title" variant="h6" component="h2">
-              {`Orden de compra # ${receptionOrder?.id}`}
+              {`Orden de recepcion # ${receptionOrder?.id}`}
             </Typography>
             <Typography variant="body1">{moment(receptionOrder?.date).locale('es').format('LLL')}</Typography>
           </Stack>
