@@ -1,7 +1,7 @@
 import { fs } from '../../../config/firebase';
 import { GlobalContext, MyContextState } from '../../../pages/_app';
 import { Car, ReceptionOrder } from '../../../types/firestore';
-import { useState, useContext } from 'react';
+import { useState, useContext, SyntheticEvent } from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import Button from '@mui/material/Button';
 import CloseIcon from '@mui/icons-material/Close';
@@ -55,7 +55,6 @@ const NewReception = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [receptionOrder, setReceptionOrder] = useState<Partial<ReceptionOrder>>(emptyReceptionOrder);
   const [cars, setCars] = useState<Car[]>([emptyCar]);
-  console.log({ cars });
 
   const handleNewCar = () => {
     setCars([...cars, emptyCar]);
@@ -66,21 +65,47 @@ const NewReception = () => {
     newCars[idx] = { ...newCars[idx], [event.target.name]: event.target.value };
     setCars(newCars);
   };
-  const handleSelectChange = (event: SelectChangeEvent) => {
+  const handleCarTypeChange = (event: SelectChangeEvent, idx: number) => {
+    const newCars = [...cars];
+    newCars[idx] = { ...newCars[idx], type: event.target.value };
+    setCars(newCars);
+  }
+  const handleProvideChange = (event: SelectChangeEvent) => {
     setReceptionOrder({ ...receptionOrder, providerId: event.target.value as string });
     const carWithNewProviderId = cars.map((car) => ({ ...car, providerId: event.target.value as string }));
     setCars(carWithNewProviderId);
   };
 
-  const handleSubmit = async () => {
-    const receptionOrderWithCars = {...receptionOrder, cars}
+
+  const handleSubmit = async (event: SyntheticEvent) => {
+    event.preventDefault();
+
+    const validCars = cars.filter((car) => {
+      if (
+        !car.cc ||
+        !car.color ||
+        !car.company ||
+        !car.doors ||
+        !car.edition ||
+        !car.fuel ||
+        !car.hp ||
+        !car.name ||
+        !car.providerId ||
+        !car.quantity ||
+        !car.type
+      )
+        return false;
+      return true;
+    });
+
+    const receptionOrderWithCars = { ...receptionOrder, createdBy: myContext.user?.uid, cars };
     //Data check
     if (!receptionOrder.providerId)
       return setMyContext({
         ...myContext,
         snackbar: { open: true, msg: 'Selecciona un proveedor', severity: 'warning' },
       });
-    if (!cars?.length)
+    if (!cars?.length || !validCars.length)
       return setMyContext({
         ...myContext,
         snackbar: { open: true, msg: 'Debes añadir al menos un vehículo con todos los datos', severity: 'warning' },
@@ -93,8 +118,8 @@ const NewReception = () => {
       if (!newReceptionOrder || !dbReceptionOrders) throw new Error('Error while getting data');
 
       //Save cars
-      for(let i = 0; i < cars.length; i++) {
-        await fs.cars.create(cars[i])
+      for (let i = 0; i < cars.length; i++) {
+        await fs.cars.create(cars[i]);
       }
 
       //Reset form
@@ -188,7 +213,7 @@ const NewReception = () => {
                     id="provider-select-id"
                     value={myContext.providers.find((provider) => provider.id === receptionOrder.providerId)?.id || ''}
                     label="Proveedor"
-                    onChange={handleSelectChange}
+                    onChange={handleProvideChange}
                   >
                     {myContext.providers.map((provider) => (
                       <MenuItem key={provider.id} value={provider.id}>
@@ -204,10 +229,15 @@ const NewReception = () => {
               </Button>
 
               {cars.map((car, idx) => (
-                <NewCarDetail car={car} idx={idx} key={idx} handleCarChange={handleCarChange} />
+                <NewCarDetail car={car} idx={idx} key={idx} handleCarChange={handleCarChange} handleCarTypeChange={handleCarTypeChange}/>
               ))}
 
-              <Button variant="contained" sx={{ marginRight: 'auto', width: '12rem' }} onClick={handleSubmit}>
+              <Button
+                type="submit"
+                variant="contained"
+                sx={{ marginRight: 'auto', width: '12rem' }}
+                onClick={handleSubmit}
+              >
                 {loading ? <CircularProgress size="1.9rem" sx={{ color: '#fff' }} /> : 'Registrar'}
               </Button>
             </Stack>
@@ -218,7 +248,8 @@ const NewReception = () => {
   );
 };
 
-const NewCarDetail = ({ car, idx, handleCarChange }: NewCarDetail) => {
+const NewCarDetail = ({ car, idx, handleCarChange, handleCarTypeChange }: NewCarDetail) => {
+
   return (
     <Grid spacing={1} sx={{ border: '1px solid #c4c4c4', p: 2, mb: 1, borderRadius: '.25rem' }} container>
       <Grid xs={6}>
@@ -249,7 +280,7 @@ const NewCarDetail = ({ car, idx, handleCarChange }: NewCarDetail) => {
           required
         />
       </Grid>
-      <Grid xs={6}>
+      <Grid xs={3}>
         <TextField
           id="edition"
           name="edition"
@@ -262,6 +293,27 @@ const NewCarDetail = ({ car, idx, handleCarChange }: NewCarDetail) => {
           fullWidth
           required
         />
+      </Grid>
+      <Grid xs={3}>
+        <FormControl size="small" sx={{width: '100%' }}>
+          <InputLabel id="car-type-select-id-label">Tipo</InputLabel>
+          <Select
+            name='type'
+            fullWidth
+            labelId="car-type-select-id-label"
+            id="car-type-select-id"
+            value={types.find((type) => type.value === car.type)?.value || ''}
+            label="Proveedor"
+            onChange={(event) => handleCarTypeChange(event, idx)}
+          >
+            {types.map((type) => (
+              <MenuItem key={type.value} value={type.value}>
+                {type.label}
+              </MenuItem>
+            ))}
+          </Select>
+          <FormHelperText>Tipo de vehículo</FormHelperText>
+        </FormControl>
       </Grid>
       <Grid xs={3}>
         <TextField
@@ -348,7 +400,7 @@ const NewCarDetail = ({ car, idx, handleCarChange }: NewCarDetail) => {
         />
       </Grid>
       <Grid xs={6}>
-        <Divider/>
+        <Divider />
       </Grid>
       <Grid xs={6}>
         <TextField
@@ -372,6 +424,16 @@ interface NewCarDetail {
   car: Car;
   idx: number;
   handleCarChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, idx: number) => void;
+  handleCarTypeChange: (event: SelectChangeEvent<string>, idx: number) => void;
 }
+
+const types = [
+  { value: 'citycar', label: 'Citycar' },
+  { value: 'sedan', label: 'Sedan' },
+  { value: 'hatchback', label: 'Hatchback' },
+  { value: 'sport', label: 'Deportivo' },
+  { value: 'suv', label: 'SUV' },
+  { value: 'pickup', label: 'Camioneta' },
+];
 
 export default NewReception;

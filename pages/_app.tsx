@@ -4,13 +4,14 @@ import { ThemeProvider } from '@mui/material';
 import lightTheme from '../theme/light';
 import MainLayout from '../components/MainLayout/MainLayout';
 import type { AppProps } from 'next/app';
-import { Provider, PurchaseOrder, User } from '../types/firestore.d';
+import { Provider, PurchaseOrder, ReceptionOrder, User } from '../types/firestore.d';
 
 export interface MyContext {
   user: User | null;
   providers: Provider[];
   purchaseOrders: PurchaseOrder[];
   users: User[];
+  receptionOrders: ReceptionOrder[],
   snackbar: Snackbar;
 }
 
@@ -31,6 +32,7 @@ export const GlobalContext = createContext<MyContextState>({
     providers: [],
     purchaseOrders: [],
     users: [],
+    receptionOrders: [],
     snackbar: {
       open: false,
       msg: '',
@@ -46,6 +48,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     providers: [],
     purchaseOrders: [],
     users: [],
+    receptionOrders: [],
     snackbar: {
       open: false,
       msg: '',

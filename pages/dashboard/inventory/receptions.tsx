@@ -1,5 +1,6 @@
 import InventoryHeader from '../../../components/Inventory/Header';
 import NewReception from '../../../components/Inventory/Receptions/NewReception';
+import ReceptionsTable from '../../../components/Inventory/Receptions/ReceptionsTable';
 import MenuLayout from '../../../components/MenuLayout/MenuLayout';
 
 const Receptions = () => {
@@ -7,6 +8,7 @@ const Receptions = () => {
     <MenuLayout>
       <>
         <InventoryHeader />
+        <ReceptionsTable/>
         <NewReception />
       </>
     </MenuLayout>

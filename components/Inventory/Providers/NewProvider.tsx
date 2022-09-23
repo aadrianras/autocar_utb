@@ -17,6 +17,7 @@ import TextField from '@mui/material/TextField';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
+import { format } from 'path';
 
 const NewProvider = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -24,7 +25,6 @@ const NewProvider = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const { myContext, setMyContext } = useContext<MyContextState>(GlobalContext);
   const [form, setForm] = useState<Provider>({
-    id: '',
     address: '',
     contactName: '',
     city: cities[0],
@@ -41,10 +41,16 @@ const NewProvider = () => {
 
   const handleSubmit = async () => {
     setLoading(true);
-    const data = { ...form };
-    delete data.id;
+
+    if(!form.address || !form.city || !form.company || !form.contactName || !form.contactPhone ) {
+      return setMyContext({
+        ...myContext,
+        snackbar: { open: true, msg: 'Debes llenar correctamente todos los campos.', severity: 'warning' },
+      });
+    }
+
     try {
-      const newProvider = await fs.providers.create(data);
+      const newProvider = await fs.providers.create(form);
       const dbProviders = await fs.providers.getAll();
       if (!newProvider || !dbProviders) throw new Error('Error while loading');
       //Reset form
