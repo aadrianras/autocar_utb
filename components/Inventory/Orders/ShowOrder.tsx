@@ -1,7 +1,7 @@
 import { fs } from '../../../config/firebase';
 import { Dispatch, SetStateAction, useEffect } from 'react';
 import { GlobalContext, MyContextState } from '../../../pages/_app';
-import { OrderedCars } from '../../../types/firestore';
+import { OrderedCar } from '../../../types/firestore';
 import { useState, useContext } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import FormControl from '@mui/material/FormControl';
@@ -74,7 +74,7 @@ const ShowOrder = ({ purchaseOrderId, setPurchaseOrderId }: Props) => {
           </Stack>
           <DataGrid
             rows={purchaseOrder?.orderedCars || []}
-            getRowId={(row: OrderedCars) => row.name}
+            getRowId={(row: OrderedCar) => row.name}
             columns={getColumns()}
             autoHeight
             hideFooter

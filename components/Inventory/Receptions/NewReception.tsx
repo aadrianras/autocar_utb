@@ -31,7 +31,7 @@ const defaultFormValue: PurchaseOrder = {
   status: 'pending'
 }
 
-const NewOrder = () => {
+const NewReception = () => {
   const { myContext, setMyContext } = useContext<MyContextState>(GlobalContext);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const handleClose = () => {
@@ -73,9 +73,9 @@ const NewOrder = () => {
     setLoading(true);
 
     try {
-      const newPurchaseOrder = await fs.purchaseOrders.create(data);
+      // const newPurchaseOrder = await fs.purchaseOrders.create(data);
       const dbPurchaseOrders = await fs.purchaseOrders.getAll();
-      if (!newPurchaseOrder || !dbPurchaseOrders) throw new Error('Error while getting data');
+      if (!dbPurchaseOrders) throw new Error('Error while getting data');
       //Reset form
       setForm(defaultFormValue);
       //Display success message
@@ -106,10 +106,10 @@ const NewOrder = () => {
 
   return (
     <>
-      <Tooltip title="Nueva orden de compra" placement="left">
+      <Tooltip title="Nueva orden de recepción" placement="left">
         <Fab
           color="primary"
-          aria-label="new provider"
+          aria-label="new reception"
           onClick={() => setIsModalOpen(true)}
           sx={{ position: 'absolute', bottom: '2rem', right: '2rem' }}
         >
@@ -138,7 +138,7 @@ const NewOrder = () => {
         >
           <Stack direction="row" justifyContent="space-between" alignItems="center">
             <Typography id="modal-modal-title" variant="h6" component="h2">
-              Nueva orden de compra
+              Nueva orden de recepción 
             </Typography>
             <IconButton aria-label="Cerrar nuevo proveedor" onClick={handleClose} sx={{ borderRadius: '.25rem' }}>
               <CloseIcon />
@@ -266,4 +266,4 @@ interface NewCarDetail {
   handleCarChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, idx: number) => void;
 }
 
-export default NewOrder;
+export default NewReception;

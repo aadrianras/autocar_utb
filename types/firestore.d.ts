@@ -21,13 +21,27 @@ export interface PurchaseOrder {
   date: number;
   createdBy: string;
   providerId: string;
-  orderedCars: OrderedCars[];
+  orderedCars: OrderedCar[];
   status: 'pending' | 'rejected' | 'approved'
 }
 
-export interface OrderedCars {
+export interface OrderedCar {
   year: number;
   quantity: number;
   name: string;
   detail: string;
+}
+
+export interface Car {
+  year: number;
+  quantity: number;
+  name: string;
+  cc: number;
+  company: string;
+  edition: string;
+  color: string;
+  doors: number;
+  hp: number;
+  type: string;
+  fuel: string;
 }

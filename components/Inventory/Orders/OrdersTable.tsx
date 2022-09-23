@@ -44,7 +44,7 @@ const OrdersTable = () => {
       <DataGrid
         rows={dataPurchaseOrders}
         columns={getColumns(handleEditPurchaseOrder, myContext?.user?.role)}
-        onRowClick={((params) => setPurchaseOrderIdShow(params.row.id))}
+        onCellDoubleClick={((params) => setPurchaseOrderIdShow(params.row.id))}
         autoHeight
       />
       <EditOrder purchaseOrderId={purchaseOrderId} setPurchaseOrderId={setPurchaseOrderId} />
