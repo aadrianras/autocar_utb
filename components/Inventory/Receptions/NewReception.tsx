@@ -1,6 +1,6 @@
 import { fs } from '../../../config/firebase';
 import { GlobalContext, MyContextState } from '../../../pages/_app';
-import { OrderedCar, Provider, PurchaseOrder } from '../../../types/firestore';
+import { Car, ReceptionOrder } from '../../../types/firestore';
 import { useState, useContext } from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import Button from '@mui/material/Button';
@@ -19,73 +19,95 @@ import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Unstable_Grid2';
 import CircularProgress from '@mui/material/CircularProgress';
+import Divider from '@mui/material/Divider';
 import moment from 'moment';
 import 'moment/locale/es';
 
-const defaultFormValue: PurchaseOrder = {
-  id: '',
+const emptyReceptionOrder: Partial<ReceptionOrder> = {
   date: Date.now(),
   createdBy: '',
   providerId: '',
-  orderedCars: [{ name: '', detail: '', quantity: 0, year: moment().year() }],
-  status: 'pending'
-}
+};
+
+const emptyCar: Car = {
+  year: moment().year(),
+  quantity: 0,
+  name: '',
+  cc: 0,
+  company: '',
+  edition: '',
+  color: '',
+  doors: 0,
+  hp: 0,
+  type: '',
+  fuel: '',
+  providerId: '',
+};
 
 const NewReception = () => {
   const { myContext, setMyContext } = useContext<MyContextState>(GlobalContext);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const handleClose = () => {
-    setForm(defaultFormValue);
-    setIsModalOpen(false)
+    setReceptionOrder(emptyReceptionOrder);
+    setCars([emptyCar]);
+    setIsModalOpen(false);
   };
   const [loading, setLoading] = useState<boolean>(false);
-
-  const [form, setForm] = useState<PurchaseOrder>(defaultFormValue);
+  const [receptionOrder, setReceptionOrder] = useState<Partial<ReceptionOrder>>(emptyReceptionOrder);
+  const [cars, setCars] = useState<Car[]>([emptyCar]);
+  console.log({ cars });
 
   const handleNewCar = () => {
-    setForm({
-      ...form,
-      orderedCars: [...form.orderedCars, { name: '', detail: '', quantity: 0, year: moment().year() }],
-    });
+    setCars([...cars, emptyCar]);
   };
 
   const handleCarChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, idx: number) => {
-    const newOrderedCars = [...form.orderedCars];
-    newOrderedCars[idx] = { ...newOrderedCars[idx], [event.target.name]: event.target.value };
-    setForm((form) => ({ ...form, orderedCars: newOrderedCars }));
+    const newCars = [...cars];
+    newCars[idx] = { ...newCars[idx], [event.target.name]: event.target.value };
+    setCars(newCars);
   };
   const handleSelectChange = (event: SelectChangeEvent) => {
-    setForm({ ...form, providerId: event.target.value as string });
+    setReceptionOrder({ ...receptionOrder, providerId: event.target.value as string });
+    const carWithNewProviderId = cars.map((car) => ({ ...car, providerId: event.target.value as string }));
+    setCars(carWithNewProviderId);
   };
 
   const handleSubmit = async () => {
-    const data = {
-      ...form,
-      date: Date.now(),
-      createdBy: myContext.user?.uid,
-      orderedCars: form.orderedCars.filter((car) => car.name && car.quantity && car.year),
-    };
-    delete data.id
-
+    const receptionOrderWithCars = {...receptionOrder, cars}
     //Data check
-    if(!data.providerId) return setMyContext({...myContext, snackbar: {open: true, msg: 'Selecciona un proveedor', severity: 'warning'}})
-    if(!data.orderedCars.length) return setMyContext({...myContext, snackbar: {open: true, msg: 'Debes añadir al menos un vehículo con todos los datos', severity: 'warning'}})
+    if (!receptionOrder.providerId)
+      return setMyContext({
+        ...myContext,
+        snackbar: { open: true, msg: 'Selecciona un proveedor', severity: 'warning' },
+      });
+    if (!cars?.length)
+      return setMyContext({
+        ...myContext,
+        snackbar: { open: true, msg: 'Debes añadir al menos un vehículo con todos los datos', severity: 'warning' },
+      });
     setLoading(true);
 
     try {
-      // const newPurchaseOrder = await fs.purchaseOrders.create(data);
-      const dbPurchaseOrders = await fs.purchaseOrders.getAll();
-      if (!dbPurchaseOrders) throw new Error('Error while getting data');
+      const newReceptionOrder = await fs.receptionOrders.create(receptionOrderWithCars);
+      const dbReceptionOrders = await fs.purchaseOrders.getAll();
+      if (!newReceptionOrder || !dbReceptionOrders) throw new Error('Error while getting data');
+
+      //Save cars
+      for(let i = 0; i < cars.length; i++) {
+        await fs.cars.create(cars[i])
+      }
+
       //Reset form
-      setForm(defaultFormValue);
+      setReceptionOrder(emptyReceptionOrder);
+      setCars([emptyCar]);
       //Display success message
       setMyContext({
         ...myContext,
-        purchaseOrders: dbPurchaseOrders,
+        purchaseOrders: dbReceptionOrders,
         snackbar: {
           open: true,
           severity: 'success',
-          msg: 'Orden de compra creada correctamente.',
+          msg: 'Orden de recepcion correctamente.',
         },
       });
       //Close providers modal
@@ -138,7 +160,7 @@ const NewReception = () => {
         >
           <Stack direction="row" justifyContent="space-between" alignItems="center">
             <Typography id="modal-modal-title" variant="h6" component="h2">
-              Nueva orden de recepción 
+              Nueva orden de recepción
             </Typography>
             <IconButton aria-label="Cerrar nuevo proveedor" onClick={handleClose} sx={{ borderRadius: '.25rem' }}>
               <CloseIcon />
@@ -150,7 +172,7 @@ const NewReception = () => {
                 <TextField
                   id="date"
                   name="date"
-                  defaultValue={moment(form.date).locale('es').format('LLL')}
+                  defaultValue={moment(receptionOrder.date).locale('es').format('LLL')}
                   label="Fecha de creación"
                   helperText="Fecha de creación de la order de compra"
                   variant="outlined"
@@ -164,7 +186,7 @@ const NewReception = () => {
                   <Select
                     labelId="provider-select-id-label"
                     id="provider-select-id"
-                    value={myContext.providers.find((provider) => provider.id === form.providerId)?.id || ''}
+                    value={myContext.providers.find((provider) => provider.id === receptionOrder.providerId)?.id || ''}
                     label="Proveedor"
                     onChange={handleSelectChange}
                   >
@@ -181,7 +203,7 @@ const NewReception = () => {
                 Añadir vehículo
               </Button>
 
-              {form.orderedCars.map((car, idx) => (
+              {cars.map((car, idx) => (
                 <NewCarDetail car={car} idx={idx} key={idx} handleCarChange={handleCarChange} />
               ))}
 
@@ -213,12 +235,40 @@ const NewCarDetail = ({ car, idx, handleCarChange }: NewCarDetail) => {
           required
         />
       </Grid>
+      <Grid xs={6}>
+        <TextField
+          id="company"
+          name="company"
+          label="Marca del vehículo"
+          helperText="Ingresa el nombre comercial de los fabricantes"
+          value={car.company}
+          onChange={(event) => handleCarChange(event, idx)}
+          variant="outlined"
+          size="small"
+          fullWidth
+          required
+        />
+      </Grid>
+      <Grid xs={6}>
+        <TextField
+          id="edition"
+          name="edition"
+          label="Edición"
+          helperText="Edición del vehículo"
+          value={car.edition}
+          onChange={(event) => handleCarChange(event, idx)}
+          variant="outlined"
+          size="small"
+          fullWidth
+          required
+        />
+      </Grid>
       <Grid xs={3}>
         <TextField
           id="year"
           name="year"
           label="Año del modelo"
-          helperText="Ingresa el año de creación del modelo"
+          helperText="Año de fabricación"
           value={car.year}
           onChange={(event) => handleCarChange(event, idx)}
           variant="outlined"
@@ -228,6 +278,79 @@ const NewCarDetail = ({ car, idx, handleCarChange }: NewCarDetail) => {
         />
       </Grid>
       <Grid xs={3}>
+        <TextField
+          id="color"
+          name="color"
+          label="Color"
+          helperText="Color exterior"
+          value={car.color}
+          onChange={(event) => handleCarChange(event, idx)}
+          variant="outlined"
+          size="small"
+          fullWidth
+          required
+        />
+      </Grid>
+      <Grid xs={3}>
+        <TextField
+          id="doors"
+          name="doors"
+          label="Cantidad de puertas"
+          helperText="Total de puertas"
+          value={car.doors}
+          onChange={(event) => handleCarChange(event, idx)}
+          variant="outlined"
+          size="small"
+          fullWidth
+          required
+        />
+      </Grid>
+      <Grid xs={3}>
+        <TextField
+          id="cc"
+          name="cc"
+          label="Cilindrada"
+          helperText="Ingrese la cilindrada"
+          value={car.cc}
+          onChange={(event) => handleCarChange(event, idx)}
+          variant="outlined"
+          size="small"
+          fullWidth
+          required
+        />
+      </Grid>
+      <Grid xs={3}>
+        <TextField
+          id="hp"
+          name="hp"
+          label="Potencia"
+          helperText="HP"
+          value={car.hp}
+          onChange={(event) => handleCarChange(event, idx)}
+          variant="outlined"
+          size="small"
+          fullWidth
+          required
+        />
+      </Grid>
+      <Grid xs={3}>
+        <TextField
+          id="fuel"
+          name="fuel"
+          label="Combustible"
+          helperText="Tipo de combustible"
+          value={car.fuel}
+          onChange={(event) => handleCarChange(event, idx)}
+          variant="outlined"
+          size="small"
+          fullWidth
+          required
+        />
+      </Grid>
+      <Grid xs={6}>
+        <Divider/>
+      </Grid>
+      <Grid xs={6}>
         <TextField
           id="quantity"
           name="quantity"
@@ -241,27 +364,12 @@ const NewCarDetail = ({ car, idx, handleCarChange }: NewCarDetail) => {
           required
         />
       </Grid>
-      <Grid xs={12}>
-        <TextField
-          id="detail"
-          name="detail"
-          label="Detalle"
-          helperText="Ingresa las caracteristicas del vehículo"
-          value={car.detail}
-          onChange={(event) => handleCarChange(event, idx)}
-          variant="outlined"
-          size="small"
-          multiline
-          fullWidth
-          required
-        />
-      </Grid>
     </Grid>
   );
 };
 
 interface NewCarDetail {
-  car: OrderedCar;
+  car: Car;
   idx: number;
   handleCarChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, idx: number) => void;
 }

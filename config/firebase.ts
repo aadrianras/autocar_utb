@@ -1,7 +1,7 @@
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
-import { Provider, PurchaseOrder, User } from '../types/firestore';
+import { Car, Provider, PurchaseOrder, ReceptionOrder, User } from '../types/firestore';
 
 const config = {
   apiKey: 'AIzaSyC6IJpnB5VttmjmG6T4OtwyCDCPV_bn18I',
@@ -128,6 +128,52 @@ const fs = {
       }
     },
   },
+  receptionOrders: {
+    create: async function (data: Partial<ReceptionOrder>): Promise<ReceptionOrder | null> {
+      try {
+        const newReceptionOrder = await db.collection('receptionOrder').add(data);
+        const newReceptionOrderId = await newReceptionOrder.id;
+        return { id: newReceptionOrderId, ...data } as ReceptionOrder;
+      } catch (error) {
+        console.log({ error });
+        return null;
+      }
+    },
+    getAll: async function (): Promise<ReceptionOrder[]> {
+      try {
+        const receptionOrders = await (
+          await db.collection('receptionOrder').get()
+        ).docs.map((doc): ReceptionOrder => ({ id: doc.id, ...doc.data() } as ReceptionOrder));
+        return receptionOrders;
+      } catch (error) {
+        console.log({ error });
+        return [];
+      }
+    },
+  },
+  cars: {
+    create: async function (data: Partial<Car>): Promise<Car | null> {
+      try {
+        const newCar = await db.collection('cars').add(data);
+        const newCarId = await newCar.id;
+        return { id: newCarId, ...data } as Car;
+      } catch (error) {
+        console.log({ error });
+        return null;
+      }
+    },
+    getAll: async function (): Promise<Car[]> {
+      try {
+        const cars = await (
+          await db.collection('cars').get()
+        ).docs.map((doc): Car => ({ id: doc.id, ...doc.data() } as Car));
+        return cars;
+      } catch (error) {
+        console.log({ error });
+        return [];
+      }
+    },
+  }
 };
 
 export { fs, auth };

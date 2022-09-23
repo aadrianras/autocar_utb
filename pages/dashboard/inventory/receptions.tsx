@@ -1,12 +1,16 @@
-import InventoryHeader from "../../../components/Inventory/Header";
-import MenuLayout from "../../../components/MenuLayout/MenuLayout";
+import InventoryHeader from '../../../components/Inventory/Header';
+import NewReception from '../../../components/Inventory/Receptions/NewReception';
+import MenuLayout from '../../../components/MenuLayout/MenuLayout';
 
 const Receptions = () => {
-    return (
-      <MenuLayout>
+  return (
+    <MenuLayout>
+      <>
         <InventoryHeader />
-      </MenuLayout>
-    );
-}
+        <NewReception />
+      </>
+    </MenuLayout>
+  );
+};
 
 export default Receptions;

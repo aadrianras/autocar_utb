@@ -32,16 +32,26 @@ export interface OrderedCar {
   detail: string;
 }
 
+export interface ReceptionOrder {
+  id?: string;
+  date: number;
+  createdBy: string;
+  providerId: string;
+  cars: Car[];
+}
+
 export interface Car {
-  year: number;
-  quantity: number;
-  name: string;
   cc: number;
-  company: string;
-  edition: string;
   color: string;
+  company: string;
   doors: number;
-  hp: number;
-  type: string;
+  edition: string;
   fuel: string;
+  hp: number;
+  id?: string;
+  name: string;
+  providerId: string;
+  quantity: number;
+  type: string;
+  year: number;
 }
