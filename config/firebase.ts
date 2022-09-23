@@ -28,8 +28,8 @@ const fs = {
         ).docs.map((doc): User => ({ uid: doc.id, ...doc.data() } as User));
         return users;
       } catch (error) {
-        console.log({error})
-        return []
+        console.log({ error });
+        return [];
       }
     },
     get: async function (uid: string): Promise<User | null> {
@@ -55,11 +55,11 @@ const fs = {
     },
     logout: async function () {
       try {
-        const logout = await auth.signOut()
-        return logout
+        const logout = await auth.signOut();
+        return logout;
       } catch (error) {
-        console.log({error})
-        if(error instanceof Error) throw error;
+        console.log({ error });
+        if (error instanceof Error) throw error;
       }
     },
   },
@@ -71,29 +71,29 @@ const fs = {
         ).docs.map((doc): Provider => ({ id: doc.id, ...doc.data() } as Provider));
         return providers;
       } catch (error) {
-        console.log({error})
-        return []
+        console.log({ error });
+        return [];
       }
     },
-    create: async function (data: Partial<Provider>): Promise<Provider|null> {
+    create: async function (data: Partial<Provider>): Promise<Provider | null> {
       try {
         const newProvider = await db.collection('providers').add(data);
-        const providerId = await newProvider.id
-        return {id: providerId, ...data} as Provider
+        const providerId = await newProvider.id;
+        return { id: providerId, ...data } as Provider;
       } catch (error) {
-        console.log({error})
-        return null
+        console.log({ error });
+        return null;
       }
     },
     update: async function (data: Provider) {
       try {
-        await db.collection('providers').doc(data.id).update(data)
-        return true
+        await db.collection('providers').doc(data.id).update(data);
+        return true;
       } catch (error) {
-        console.log({error})
-        return false
+        console.log({ error });
+        return false;
       }
-    }
+    },
   },
   purchaseOrders: {
     getAll: async function (): Promise<PurchaseOrder[]> {
@@ -103,21 +103,31 @@ const fs = {
         ).docs.map((doc): PurchaseOrder => ({ id: doc.id, ...doc.data() } as PurchaseOrder));
         return purchaseOrders;
       } catch (error) {
-        console.log({error})
-        return []
+        console.log({ error });
+        return [];
       }
     },
-    create: async function (data: Partial<PurchaseOrder>): Promise<PurchaseOrder|null> {
+    create: async function (data: Partial<PurchaseOrder>): Promise<PurchaseOrder | null> {
       try {
         const newPurchaseOrder = await db.collection('purchaseOrders').add(data);
-        const newPurchaseOrderId = await newPurchaseOrder.id
-        return {id: newPurchaseOrderId, ...data} as PurchaseOrder
+        const newPurchaseOrderId = await newPurchaseOrder.id;
+        return { id: newPurchaseOrderId, ...data } as PurchaseOrder;
       } catch (error) {
-        console.log({error})
-        return null
+        console.log({ error });
+        return null;
       }
-    }
-  }
+    },
+    update: async function (data: Partial<PurchaseOrder>): Promise<PurchaseOrder | null> {
+      try {
+        const updatedOrder = await db.collection('purchaseOrders').doc(data.id).update(data);
+        const updatedOrderId = await updatedOrder;
+        return { id: updatedOrderId, ...data } as PurchaseOrder;
+      } catch (error) {
+        console.log({ error });
+        return null;
+      }
+    },
+  },
 };
 
 export { fs, auth };

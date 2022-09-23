@@ -6,15 +6,15 @@ import { Provider, PurchaseOrder } from '../../../types/firestore';
 import { useContext, useState, useEffect } from 'react';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import moment from 'moment';
+import EditOrder from './EditOrder';
+import { DataTablePurchaseOrder } from '../../../types/PurchaseOrder';
 
 const OrdersTable = () => {
   const { myContext } = useContext<MyContextState>(GlobalContext);
-  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
-  const [purchaseOrder, setPurchaseOrder] = useState<Provider | null>(null);
+  const [purchaseOrderId, setPurchaseOrderId] = useState<string | null>(null);
   const [dataPurchaseOrders, setDataPurchaseOrders] = useState<DataTablePurchaseOrder[]>([]);
-  const handleEditProvider = (provider: Provider) => {
-    setIsEditModalOpen(true);
-    setPurchaseOrder(provider);
+  const handleEditPurchaseOrder = (order: DataTablePurchaseOrder) => {
+    setPurchaseOrderId(order.id);
   };
 
   useEffect(() => {
@@ -22,7 +22,7 @@ const OrdersTable = () => {
       const company = myContext.providers.find((provider) => provider.id === purchaseOrder.providerId)?.company;
       const createdByUser = myContext.users.find((user) => user.uid === purchaseOrder.createdBy);
       const createdBy = `${createdByUser?.name} ${createdByUser?.lastname}`;
-      console.log(purchaseOrder.date)
+
       return {
         id: purchaseOrder.id,
         company,
@@ -41,18 +41,16 @@ const OrdersTable = () => {
       <Typography variant="h4" mb="1rem">
         Ordenes de compra
       </Typography>
-      <DataGrid rows={dataPurchaseOrders} columns={getColumns(handleEditProvider)} autoHeight/>
-      {/* <EditProvider
-        isEditModalOpen={isEditModalOpen}
-        setIsEditModalOpen={setIsEditModalOpen}
-        provider={purchaseOrder}
-        setProvider={setPurchaseOrder}
-      /> */}
+      <DataGrid rows={dataPurchaseOrders} columns={getColumns(handleEditPurchaseOrder)} autoHeight />
+      <EditOrder
+        purchaseOrderId={purchaseOrderId}
+        setPurchaseOrderId={setPurchaseOrderId}
+      />
     </Box>
   );
 };
 
-const getColumns = (handleEditPurchaseOrder: (provider: Provider) => void): GridColDef[] => [
+const getColumns = (handleEditPurchaseOrder: (order: DataTablePurchaseOrder) => void): GridColDef[] => [
   {
     field: 'id',
     headerName: 'Id',
@@ -77,6 +75,36 @@ const getColumns = (handleEditPurchaseOrder: (provider: Provider) => void): Grid
     field: 'status',
     headerName: 'Estado',
     flex: 0.5,
+    renderCell({ row }: { row: DataTablePurchaseOrder }) {
+      let text: string = '';
+      let bgcolor: string = '';
+      if (row.status === 'pending') {
+        text = 'Pendiente';
+        bgcolor = '#F2DF3A';
+      }
+      if (row.status === 'approved') {
+        text = 'Aprobada';
+        bgcolor = '#7DCE13';
+      }
+      if (row.status === 'rejected') {
+        text = 'Rechazada';
+        bgcolor = '#CC3636';
+      }
+
+      return (
+        <Box
+          display="flex"
+          width="100%"
+          justifyContent="center"
+          alignItems="center"
+          sx={{ bgcolor, borderRadius: '1rem', maxWidth: '7rem' }}
+        >
+          <Typography variant="caption" sx={{ color: '#fff' }}>
+            {text}
+          </Typography>
+        </Box>
+      );
+    },
   },
   {
     field: 'edit',
@@ -86,7 +114,7 @@ const getColumns = (handleEditPurchaseOrder: (provider: Provider) => void): Grid
     hideSortIcons: true,
     minWidth: 60,
     width: 60,
-    renderCell({ row }: { row: Provider }) {
+    renderCell({ row }: { row: DataTablePurchaseOrder }) {
       return (
         <Box display="flex" width="100%" justifyContent="center" alignItems="center">
           <IconButton sx={{ borderRadius: '.25rem' }} onClick={() => handleEditPurchaseOrder(row)}>
@@ -98,12 +126,6 @@ const getColumns = (handleEditPurchaseOrder: (provider: Provider) => void): Grid
   },
 ];
 
-interface DataTablePurchaseOrder {
-  id: string;
-  company: string;
-  date: string;
-  createdBy: string;
-  status: 'pending' | 'rejected' | 'approved';
-}
+
 
 export default OrdersTable;
