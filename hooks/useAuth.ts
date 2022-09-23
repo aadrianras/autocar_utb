@@ -19,6 +19,7 @@ const useAuth = async () => {
           const dbPurchaseOrders = await fs.purchaseOrders.getAll();
           const dbUsers = await fs.user.getAll();
           const dbReceptionOrders = await fs.receptionOrders.getAll();
+          const dbCars = await fs.cars.getAll()
     
           if (!dbUser || !dbProviders || !dbUsers || !dbPurchaseOrders || !dbReceptionOrders) throw new Error('Error while loading');
           //Send authenticated user to the context
@@ -35,7 +36,8 @@ const useAuth = async () => {
             providers: dbProviders,
             purchaseOrders: dbPurchaseOrders,
             users: dbUsers,
-            receptionOrders: dbReceptionOrders
+            receptionOrders: dbReceptionOrders,
+            cars: dbCars
           });
         }
         //This part needs to be specific for each role

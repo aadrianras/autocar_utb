@@ -4,7 +4,7 @@ import { ThemeProvider } from '@mui/material';
 import lightTheme from '../theme/light';
 import MainLayout from '../components/MainLayout/MainLayout';
 import type { AppProps } from 'next/app';
-import { Provider, PurchaseOrder, ReceptionOrder, User } from '../types/firestore.d';
+import { Car, Provider, PurchaseOrder, ReceptionOrder, User } from '../types/firestore.d';
 
 export interface MyContext {
   user: User | null;
@@ -12,6 +12,7 @@ export interface MyContext {
   purchaseOrders: PurchaseOrder[];
   users: User[];
   receptionOrders: ReceptionOrder[],
+  cars: Car[];
   snackbar: Snackbar;
 }
 
@@ -33,6 +34,7 @@ export const GlobalContext = createContext<MyContextState>({
     purchaseOrders: [],
     users: [],
     receptionOrders: [],
+    cars: [],
     snackbar: {
       open: false,
       msg: '',
@@ -49,6 +51,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     purchaseOrders: [],
     users: [],
     receptionOrders: [],
+    cars: [],
     snackbar: {
       open: false,
       msg: '',

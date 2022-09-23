@@ -4,44 +4,20 @@ import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { GlobalContext, MyContextState } from '../../../pages/_app';
 import { useContext, useState, useEffect } from 'react';
 import moment from 'moment';
-import ShowOrder from './ShowOrder';
 
 
-
-const ReceptionsTable = () => {
+const InventoryTable = () => {
   const { myContext } = useContext<MyContextState>(GlobalContext);
-  const [dataReceptionOrders, setDataReceptionOrders] = useState<DataReceptionOrder[]>([])
-  const [receptionOrderId, setReceptionOrderId] = useState<string|null>(null)
-  
-  useEffect(() => {
-    const formatedData = myContext.receptionOrders.map(order => {
-      const company = myContext.providers.find((provider) => provider.id === order.providerId)?.company;
-      const createdByUser = myContext.users.find((user) => user.uid === order.createdBy);
-      const createdBy = `${createdByUser?.name} ${createdByUser?.lastname}`;
-      return {
-        id: order.id,
-        company,
-        createdBy,
-        date: moment(order.date).locale('es').format('LLL'),
-      } as DataReceptionOrder;
-    })
-    setDataReceptionOrders(formatedData)
-
-  }, [myContext.receptionOrders])
-
   return (
     <Box p="1rem 1rem 2rem 1rem" sx={{ overflowY: 'auto', height: 'calc(100% - 60px)' }}>
       <Typography variant="h4" mb="1rem">
         Ordenes de recepción
       </Typography>
       <DataGrid
-        rows={dataReceptionOrders || []}
+        rows={myContext.cars || []}
         columns={getColumns()}
-        onCellDoubleClick={((params) => setReceptionOrderId(params.row.id))}
         autoHeight
       />
-      {/* <EditOrder purchaseOrderId={purchaseOrderId} setPurchaseOrderId={setPurchaseOrderId} /> */}
-      <ShowOrder receptionOrderId={receptionOrderId} setReceptionOrderId={setReceptionOrderId} />
     </Box>
   );
 }
@@ -53,18 +29,58 @@ const getColumns = (): GridColDef[] => [
     flex: 1,
   },
   {
+    field: 'name',
+    headerName: 'Modelo',
+    flex: 2,
+  },
+  {
     field: 'company',
-    headerName: 'Proveedor',
+    headerName: 'Marca',
+    flex: 2,
+  },
+  {
+    field: 'edition',
+    headerName: 'Edición',
     flex: 1,
   },
   {
-    field: 'date',
-    headerName: 'Fecha de creación',
+    field: 'type',
+    headerName: 'Tipo',
     flex: 1,
   },
   {
-    field: 'createdBy',
-    headerName: 'Creador',
+    field: 'cc',
+    headerName: 'cc',
+    flex: 1,
+  },
+  {
+    field: 'hp',
+    headerName: 'HP',
+    flex: 1,
+  },
+  {
+    field: 'color',
+    headerName: 'Color',
+    flex: 1,
+  },
+  {
+    field: 'doors',
+    headerName: 'Puertas',
+    flex: 1,
+  },
+  {
+    field: 'fuel',
+    headerName: 'Combustible',
+    flex: 1,
+  },
+  {
+    field: 'year',
+    headerName: 'Año',
+    flex: 1,
+  },
+  {
+    field: 'quantity',
+    headerName: 'Stock',
     flex: 1,
   },
   // {
@@ -88,11 +104,4 @@ const getColumns = (): GridColDef[] => [
   // },
 ];
 
-interface DataReceptionOrder {
-  id: string
-  company: string
-  createdBy: string
-  date: string
-}
-
-export default ReceptionsTable;
+export default InventoryTable;
