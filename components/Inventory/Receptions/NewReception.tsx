@@ -42,6 +42,7 @@ const emptyCar: Car = {
   type: '',
   fuel: '',
   providerId: '',
+  price: 0
 };
 
 const NewReception = () => {
@@ -92,10 +93,13 @@ const NewReception = () => {
         !car.name ||
         !car.providerId ||
         !car.quantity ||
-        !car.type
-      )
+        !car.type ||
+        !car.price
+      ) {
         return false;
-      return true;
+      } else {
+        return true;
+      }
     });
 
     const receptionOrderWithCars = { ...receptionOrder, createdBy: myContext.user?.uid, cars };
@@ -251,7 +255,7 @@ const NewReception = () => {
 const NewCarDetail = ({ car, idx, handleCarChange, handleCarTypeChange }: NewCarDetail) => {
 
   return (
-    <Grid spacing={1} sx={{ border: '1px solid #c4c4c4', p: 2, mb: 1, borderRadius: '.25rem' }} container>
+    <Grid spacing={2} sx={{ border: '1px solid #c4c4c4', p: 2, mb: 1, borderRadius: '.25rem' }} container>
       <Grid xs={6}>
         <TextField
           id="name"
@@ -402,7 +406,21 @@ const NewCarDetail = ({ car, idx, handleCarChange, handleCarTypeChange }: NewCar
       <Grid xs={6}>
         <Divider />
       </Grid>
-      <Grid xs={6}>
+      <Grid xs={3}>
+        <TextField
+          id="price"
+          name="price"
+          label="Precio unitario"
+          helperText="Ingresa el precio unitario del vehículo"
+          value={car.price}
+          onChange={(event) => handleCarChange(event, idx)}
+          variant="outlined"
+          size="small"
+          fullWidth
+          required
+        />
+      </Grid>
+      <Grid xs={3}>
         <TextField
           id="quantity"
           name="quantity"

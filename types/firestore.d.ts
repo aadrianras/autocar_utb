@@ -7,6 +7,18 @@ export type Provider = {
   contactPhone: string;
 };
 
+export type Client = {
+  id?: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  city: string;
+  address: string;
+  invoiceName: string;
+  invoiceNumber: string;
+  contactPhone: string;
+};
+
 export interface User {
   uid: string;
   name: string;
@@ -60,4 +72,5 @@ export interface Car {
   quantity: number;
   type: string;
   year: number;
+  price: number;
 }

@@ -1,7 +1,7 @@
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
-import { Car, Provider, PurchaseOrder, ReceptionOrder, User } from '../types/firestore';
+import { Car, Client, Provider, PurchaseOrder, ReceptionOrder, User } from '../types/firestore';
 
 const config = {
   apiKey: 'AIzaSyC6IJpnB5VttmjmG6T4OtwyCDCPV_bn18I',
@@ -183,6 +183,47 @@ const fs = {
         return null;
       }
     },
+  },
+  client: {
+    getAll: async function (): Promise<Client[]> {
+      try {
+        const clients = await (
+          await db.collection('clients').get()
+        ).docs.map((doc): Client => ({ id: doc.id, ...doc.data() } as Client));
+        return clients;
+      } catch (error) {
+        console.log({ error });
+        return [];
+      }
+    },
+    create: async function (data: Partial<Client>): Promise<Client | null> {
+      try {
+        const newClient = await db.collection('clients').add(data);
+        const clientId = await newClient.id;
+        return { id: clientId, ...data } as Client;
+      } catch (error) {
+        console.log({ error });
+        return null;
+      }
+    },
+    update: async function (data: Client) {
+      try {
+        await db.collection('clients').doc(data.id).update(data);
+        return true;
+      } catch (error) {
+        console.log({ error });
+        return false;
+      }
+    },
+    delete: async function (id: string) {
+      try {
+        await db.collection('clients').doc(id).delete();
+        return true;
+      } catch (error) {
+        console.log({ error });
+        return false;
+      }
+    }
   }
 };
 

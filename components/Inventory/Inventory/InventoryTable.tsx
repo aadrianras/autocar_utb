@@ -11,7 +11,7 @@ const InventoryTable = () => {
   return (
     <Box p="1rem 1rem 2rem 1rem" sx={{ overflowY: 'auto', height: 'calc(100% - 60px)' }}>
       <Typography variant="h4" mb="1rem">
-        Ordenes de recepción
+        Inventario de vehículo
       </Typography>
       <DataGrid
         rows={myContext.cars || []}
@@ -36,7 +36,7 @@ const getColumns = (): GridColDef[] => [
   {
     field: 'company',
     headerName: 'Marca',
-    flex: 2,
+    flex: 1,
   },
   {
     field: 'edition',
@@ -81,6 +81,11 @@ const getColumns = (): GridColDef[] => [
   {
     field: 'quantity',
     headerName: 'Stock',
+    flex: 1,
+  },
+  {
+    field: 'price',
+    headerName: 'Precio Unitario ($us)',
     flex: 1,
   },
   // {
