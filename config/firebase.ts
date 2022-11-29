@@ -1,7 +1,7 @@
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
-import { Car, Client, Provider, PurchaseOrder, ReceptionOrder, User } from '../types/firestore';
+import { Car, Client, Provider, PurchaseOrder, ReceptionOrder, SaleOrder, User } from '../types/firestore';
 
 const config = {
   apiKey: 'AIzaSyC6IJpnB5VttmjmG6T4OtwyCDCPV_bn18I',
@@ -224,7 +224,40 @@ const fs = {
         return false;
       }
     }
-  }
+  },
+  saleOrder: {
+    getAll: async function (): Promise<SaleOrder[]> {
+      try {
+        const saleOrders = await (
+          await db.collection('saleOrders').get()
+        ).docs.map((doc): SaleOrder => ({ id: doc.id, ...doc.data() } as SaleOrder));
+        return saleOrders;
+      } catch (error) {
+        console.log({ error });
+        return [];
+      }
+    },
+    create: async function (data: Partial<SaleOrder>): Promise<SaleOrder | null> {
+      try {
+        const newSaleOrder = await db.collection('saleOrders').add(data);
+        const newSaleOrderId = await newSaleOrder.id;
+        return { id: newSaleOrderId, ...data } as SaleOrder;
+      } catch (error) {
+        console.log({ error });
+        return null;
+      }
+    },
+    update: async function (data: Partial<SaleOrder>): Promise<SaleOrder | null> {
+      try {
+        const updatedOrder = await db.collection('saleOrders').doc(data.id).update(data);
+        const updatedOrderId = await updatedOrder;
+        return { id: updatedOrderId, ...data } as SaleOrder;
+      } catch (error) {
+        console.log({ error });
+        return null;
+      }
+    },
+  },
 };
 
 export { fs, auth };

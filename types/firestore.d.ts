@@ -1,3 +1,5 @@
+import { Moment } from "moment";
+
 export type Provider = {
   id?: string;
   contactName: string;
@@ -18,6 +20,23 @@ export type Client = {
   invoiceNumber: string;
   contactPhone: string;
 };
+
+export type SaleOrder = {
+  id?: string;
+  clientId: string;
+  date: moment.Moment;
+  cars: OrderedCarForSale[];
+  total: number;
+  invoice: string;
+  status: 'pending' | 'completed' | 'canceled'
+}
+
+export type OrderedCarForSale = {
+  carId: string;
+  quantity: number;
+  profit: number;
+  subTotal: number;
+}
 
 export interface User {
   uid: string;

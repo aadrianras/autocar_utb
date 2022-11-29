@@ -147,8 +147,8 @@ const NewClient = () => {
             width: '100%',
             maxWidth: '35rem',
             overflowY: 'auto',
-            height: '100%',
-            maxHeight: '90%'
+            height: {xs: '100%', md: 'max-content'},
+            maxHeight: {xs: '100%', md: '90%'}
           }}
         >
           <Stack direction="row" justifyContent="space-between" alignItems="center">

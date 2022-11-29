@@ -21,8 +21,9 @@ const useAuth = async () => {
           const dbReceptionOrders = await fs.receptionOrders.getAll();
           const dbCars = await fs.cars.getAll()
           const dbClients = await fs.client.getAll();
+          const dbSaleOrders = await fs.saleOrder.getAll();
     
-          if (!dbUser || !dbProviders || !dbUsers || !dbPurchaseOrders || !dbReceptionOrders || !dbClients) throw new Error('Error while loading');
+          if (!dbUser || !dbProviders || !dbUsers || !dbPurchaseOrders || !dbReceptionOrders || !dbClients || !dbSaleOrders) throw new Error('Error while loading');
           //Send authenticated user to the context
           setMyContext({
             ...myContext,
@@ -38,6 +39,7 @@ const useAuth = async () => {
             purchaseOrders: dbPurchaseOrders,
             users: dbUsers,
             receptionOrders: dbReceptionOrders,
+            saleOrders: dbSaleOrders,
             cars: dbCars,
             clients: dbClients
           });

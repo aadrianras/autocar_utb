@@ -25,19 +25,6 @@ const SellsHeader = () => {
           </Typography>
         </a>
       </Link>
-      <Link href="/dashboard/sells/orders">
-        <a>
-          <Typography
-            sx={{
-              cursor: 'pointer',
-              fontWeight: router.asPath === '/dashboard/sells/orders' ? 'bold' : '400',
-            }}
-            variant="body1"
-          >
-            Ordenes de venta
-          </Typography>
-        </a>
-      </Link>
       <Link href="/dashboard/sells/clients">
         <a>
           <Typography
