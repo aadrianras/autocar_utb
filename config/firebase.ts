@@ -257,6 +257,15 @@ const fs = {
         return null;
       }
     },
+    delete: async function (id: string) {
+      try {
+        await db.collection('saleOrders').doc(id).delete();
+        return true;
+      } catch (error) {
+        console.log({ error });
+        return false;
+      }
+    }
   },
 };
 

@@ -1,5 +1,5 @@
 import { OrderedCarForSale, SaleOrder } from '../../../types/firestore';
-import { FormHelperText } from '@mui/material';
+import { Divider, FormHelperText } from '@mui/material';
 import { fs } from '../../../config/firebase';
 import { GlobalContext, MyContextState } from '../../../pages/_app';
 import { useState, useContext, useEffect } from 'react';
@@ -21,6 +21,7 @@ import Typography from '@mui/material/Typography';
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import 'moment/locale/es';
+import { format } from 'path';
 
 const NewOrders = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -28,7 +29,7 @@ const NewOrders = () => {
   const { myContext, setMyContext } = useContext<MyContextState>(GlobalContext);
   const [form, setForm] = useState<SaleOrder>({
     clientId: '',
-    date: moment(),
+    date: moment().format('YYYY-MM-DD HH:mm:ss'),
     cars: [defaultCar],
     total: 0,
     invoice: uuidv4(),
@@ -39,7 +40,7 @@ const NewOrders = () => {
     //Reset form
     setForm({
       clientId: '',
-      date: moment(),
+      date: moment().format('YYYY-MM-DD HH:mm:ss'),
       cars: [defaultCar],
       total: 0,
       invoice: uuidv4(),
@@ -48,15 +49,14 @@ const NewOrders = () => {
     setIsModalOpen(false);
   };
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setForm((form) => ({ ...form, [event.target.name]: event.target.value }));
-  };
-  console.log({ form });
   const handleSelectChange = (event: SelectChangeEvent) => {
     setForm({ ...form, clientId: event.target.value as string });
   };
 
-  // const handleSelectCarChange = ()
+  useEffect(() => {
+    const total: number = form.cars.reduce((acc, cur) => acc + cur.subTotal, 0);
+    setForm((prev) => ({ ...prev, total }));
+  }, [form.cars]);
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -77,7 +77,7 @@ const NewOrders = () => {
       //Reset form
       setForm({
         clientId: '',
-        date: moment(),
+        date: moment().format('YYYY-MM-DD HH:mm:ss'),
         cars: [defaultCar],
         total: 0,
         invoice: uuidv4(),
@@ -181,13 +181,35 @@ const NewOrders = () => {
                 <FormHelperText>Selecciona al cliente</FormHelperText>
               </FormControl>
 
-              <Button sx={{marginLeft: 'auto'}} onClick={() => {
-                setForm((prev) => ({...prev, cars: [...prev.cars, defaultCar]}));
-              }}>+ Agregar vehiculo</Button>
+              <Button
+                sx={{ marginLeft: 'auto' }}
+                onClick={() => {
+                  setForm((prev) => ({ ...prev, cars: [...prev.cars, defaultCar] }));
+                }}
+              >
+                + Agregar vehiculo
+              </Button>
 
               {form.cars.map((car, idx) => (
                 <OrderedCar key={idx} car={car} idx={idx} setForm={setForm} />
               ))}
+
+              <Divider />
+
+              <TextField
+                sx={{ flex: '0 1 auto' }}
+                id={`Total`}
+                name="Total"
+                type="number"
+                value={form.total}
+                label="Total ($us)"
+                variant="outlined"
+                size="small"
+                disabled
+                required
+              />
+
+              <Divider />
 
               <Button variant="contained" sx={{ marginRight: 'auto', width: '12rem' }} onClick={handleSubmit}>
                 {loading ? <CircularProgress size="1.9rem" sx={{ color: '#fff' }} /> : 'Registrar'}
@@ -213,9 +235,8 @@ const OrderedCar = ({ car, idx, setForm }: OrderedCarProps) => {
         return { ...prev, cars: updatedCars };
       });
     } else {
-      console.log('Here')
       const carPrice: number = myContext?.cars?.find((dbCar) => dbCar?.id === car?.carId)?.price || 1;
-      const subTotal = (+carPrice + (+carPrice * +car.profit)) * car.quantity
+      const subTotal = (+carPrice + +carPrice * +car.profit) * car.quantity;
       setForm((prev) => {
         const updatedCars: OrderedCarForSale[] = prev.cars.map((car, j) => {
           if (j === idx) return { ...car, subTotal };
@@ -247,8 +268,8 @@ const OrderedCar = ({ car, idx, setForm }: OrderedCarProps) => {
   };
 
   return (
-    <Stack sx={{flexDirection: 'row', gap: '.5rem', flexWrap: 'wrap'}}>
-      <FormControl size="small" fullWidth sx={{flex: '1 0 auto'}}>
+    <Stack sx={{ flexDirection: 'column', gap: '.5rem', flexWrap: 'wrap' }}>
+      <FormControl size="small" fullWidth sx={{ flex: '1 0 auto' }}>
         <InputLabel id={`ordered-car-${idx}`}>Vehiculo</InputLabel>
         <Select
           labelId={`ordered-car-${idx}`}
@@ -258,43 +279,46 @@ const OrderedCar = ({ car, idx, setForm }: OrderedCarProps) => {
           onChange={handleChange}
         >
           {myContext.cars.map((car) => (
-            <MenuItem value={car.id}>{`${car.name} - ${car.company} - ${car.year}`}</MenuItem>
+            <MenuItem key={car.id} value={car.id}>{`${car.name} - ${car.company} - ${car.year}`}</MenuItem>
           ))}
         </Select>
       </FormControl>
 
-      <TextField
-        sx={{flex: '0 1 auto'}}
-        id={`quantity-${idx}`}
-        name="quantity"
-        value={car.quantity}
-        onChange={handleQuantityChange}
-        type='number'
-        label="Cantidad"
-        variant="outlined"
-        size="small"
-        required
-      />
+      <Stack sx={{ flexDirection: 'row', gap: '.5rem', flexWrap: 'nowrap' }}>
+        <TextField
+          sx={{ flex: '0 1 auto' }}
+          id={`quantity-${idx}`}
+          name="quantity"
+          value={car.quantity}
+          inputProps={{ min: 0 }}
+          onChange={handleQuantityChange}
+          type="number"
+          label="Cantidad"
+          variant="outlined"
+          size="small"
+          required
+        />
 
-      <TextField
-        sx={{flex: '0 1 50%'}}
-        id={`subTotal-${idx}`}
-        name="subTotal"
-        type='number'
-        value={car.subTotal}
-        label="Sub-Total ($us)"
-        variant="outlined"
-        size="small"
-        disabled
-        required
-      />
+        <TextField
+          sx={{ flex: '0 1 auto' }}
+          id={`subTotal-${idx}`}
+          name="subTotal"
+          type="number"
+          value={car.subTotal}
+          label="Sub-Total ($us)"
+          variant="outlined"
+          size="small"
+          disabled
+          required
+        />
+      </Stack>
     </Stack>
   );
 };
 
 const defaultCar: OrderedCarForSale = {
   carId: '',
-  profit: .13,
+  profit: 0.13,
   quantity: 0,
   subTotal: 0,
 };

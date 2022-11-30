@@ -24,7 +24,7 @@ export type Client = {
 export type SaleOrder = {
   id?: string;
   clientId: string;
-  date: moment.Moment;
+  date: string;
   cars: OrderedCarForSale[];
   total: number;
   invoice: string;
