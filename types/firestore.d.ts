@@ -28,7 +28,7 @@ export type SaleOrder = {
   cars: OrderedCarForSale[];
   total: number;
   invoice: string;
-  status: 'pending' | 'completed' | 'canceled'
+  status: 'pending' | 'completed' | 'rejected'
 }
 
 export type OrderedCarForSale = {
@@ -36,6 +36,26 @@ export type OrderedCarForSale = {
   quantity: number;
   profit: number;
   subTotal: number;
+}
+
+export type RepairedCar = {
+  id?: string;
+  status: 'received' | 'repaired' | 'returned';
+  receptionDate: string | null;
+  returnDate: string | null;
+  firstName: string;
+  lastName: string;
+  contactPhone: string;
+  carModel: string;
+  carBrand: string;
+  carPlate: string;
+  details: string;
+  repairs: Repairs[];
+}
+
+export type Repairs = {
+  name: string;
+  approved: boolean;
 }
 
 export interface User {

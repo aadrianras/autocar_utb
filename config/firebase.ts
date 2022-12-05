@@ -1,7 +1,7 @@
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
-import { Car, Client, Provider, PurchaseOrder, ReceptionOrder, SaleOrder, User } from '../types/firestore';
+import { Car, Client, Provider, PurchaseOrder, ReceptionOrder, RepairedCar, SaleOrder, User } from '../types/firestore';
 
 const config = {
   apiKey: 'AIzaSyC6IJpnB5VttmjmG6T4OtwyCDCPV_bn18I',
@@ -260,6 +260,47 @@ const fs = {
     delete: async function (id: string) {
       try {
         await db.collection('saleOrders').doc(id).delete();
+        return true;
+      } catch (error) {
+        console.log({ error });
+        return false;
+      }
+    }
+  },
+  repairedCar: {
+    getAll: async function (): Promise<RepairedCar[]> {
+      try {
+        const repairedCars = await (
+          await db.collection('repairedCars').get()
+        ).docs.map((doc): RepairedCar => ({ id: doc.id, ...doc.data() } as RepairedCar));
+        return repairedCars;
+      } catch (error) {
+        console.log({ error });
+        return [];
+      }
+    },
+    create: async function (data: Partial<RepairedCar>): Promise<RepairedCar | null> {
+      try {
+        const newRepairedCar = await db.collection('repairedCars').add(data);
+        const repairedCarId = await newRepairedCar.id;
+        return { id: repairedCarId, ...data } as RepairedCar;
+      } catch (error) {
+        console.log({ error });
+        return null;
+      }
+    },
+    update: async function (data: RepairedCar) {
+      try {
+        await db.collection('repairedCars').doc(data.id).update(data);
+        return true;
+      } catch (error) {
+        console.log({ error });
+        return false;
+      }
+    },
+    delete: async function (id: string) {
+      try {
+        await db.collection('repairedCars').doc(id).delete();
         return true;
       } catch (error) {
         console.log({ error });

@@ -22,8 +22,9 @@ const useAuth = async () => {
           const dbCars = await fs.cars.getAll()
           const dbClients = await fs.client.getAll();
           const dbSaleOrders = await fs.saleOrder.getAll();
+          const dbRepairedCars = await fs.repairedCar.getAll();
     
-          if (!dbUser || !dbProviders || !dbUsers || !dbPurchaseOrders || !dbReceptionOrders || !dbClients || !dbSaleOrders) throw new Error('Error while loading');
+          if (!dbUser || !dbProviders || !dbUsers || !dbPurchaseOrders || !dbReceptionOrders || !dbClients || !dbSaleOrders || !dbRepairedCars) throw new Error('Error while loading');
           //Send authenticated user to the context
           setMyContext({
             ...myContext,
@@ -41,7 +42,8 @@ const useAuth = async () => {
             receptionOrders: dbReceptionOrders,
             saleOrders: dbSaleOrders,
             cars: dbCars,
-            clients: dbClients
+            clients: dbClients,
+            repairedCars: dbRepairedCars
           });
         }
         //This part needs to be specific for each role

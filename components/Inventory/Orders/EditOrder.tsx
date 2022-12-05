@@ -18,12 +18,6 @@ import moment from 'moment';
 import 'moment/locale/es';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 
-const statusOptions = [
-  { value: 'pending', label: 'Pendiente' },
-  { value: 'approved', label: 'Aprobada' },
-  { value: 'rejected', label: 'Rechazada' },
-];
-
 const EditOrder = ({ purchaseOrderId, setPurchaseOrderId }: Props) => {
   const { myContext, setMyContext } = useContext<MyContextState>(GlobalContext);
   const purchaseOrder = myContext.purchaseOrders.find((order) => order.id === purchaseOrderId);
@@ -168,6 +162,11 @@ const getColumns = (): GridColDef[] => [
   },
 ];
 
+const statusOptions = [
+  { value: 'pending', label: 'Pendiente' },
+  { value: 'approved', label: 'Aprobada' },
+  { value: 'rejected', label: 'Rechazada' },
+];
 interface Props {
   purchaseOrderId: string | null;
   setPurchaseOrderId: Dispatch<SetStateAction<string | null>>;

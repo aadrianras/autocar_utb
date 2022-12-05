@@ -1,8 +1,8 @@
-import { Car, OrderedCarForSale, SaleOrder } from '../../../types/firestore';
+import { OrderedCarForSale, SaleOrder } from '../../../types/firestore';
 import { Divider, FormHelperText } from '@mui/material';
 import { fs } from '../../../config/firebase';
 import { GlobalContext, MyContextState } from '../../../pages/_app';
-import { useState, useContext, useEffect } from 'react';
+import { useState, useContext, useEffect, Dispatch, SetStateAction } from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -18,35 +18,59 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
-import moment from 'moment';
-import { v4 as uuidv4 } from 'uuid';
 import 'moment/locale/es';
-import { format } from 'path';
+import moment from 'moment';
 
-const NewOrders = () => {
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
+const NewOrders = ({isEditModalOpen, setIsEditModalOpen, saleOrder, setSaleOrder}: Props) => {
   const [loading, setLoading] = useState<boolean>(false);
   const { myContext, setMyContext } = useContext<MyContextState>(GlobalContext);
   const [form, setForm] = useState<SaleOrder>({
-    clientId: '',
-    date: moment().format('YYYY-MM-DD HH:mm:ss'),
-    cars: [defaultCar],
-    total: 0,
-    invoice: uuidv4(),
-    status: 'pending',
+    id: saleOrder?.id || '',
+    clientId: saleOrder?.clientId || '',
+    date: saleOrder?.date || '',
+    cars: saleOrder?.cars || [],
+    total: saleOrder?.total || 0,
+    invoice: saleOrder?.invoice || '',
+    status: saleOrder?.status || 'pending',
   });
+
+  useEffect(() => {
+    if(saleOrder) {
+      setForm({
+        id: saleOrder?.id || '',
+        clientId: saleOrder?.clientId || '',
+        date: saleOrder?.date || '',
+        cars: saleOrder?.cars || [],
+        total: saleOrder?.total || 0,
+        invoice: saleOrder?.invoice || '',
+        status: saleOrder?.status || 'pending',
+      })
+    } else {
+      setForm({
+        id: '',
+        clientId: '',
+        date: '',
+        cars: [],
+        total: 0,
+        invoice: '',
+        status: 'pending',
+      })
+    }
+  }, [saleOrder])
 
   const handleClose = () => {
     //Reset form
     setForm({
       clientId: '',
-      date: moment().format('YYYY-MM-DD HH:mm:ss'),
+      date: '',
       cars: [defaultCar],
       total: 0,
-      invoice: uuidv4(),
+      invoice: '',
       status: 'pending',
     });
-    setIsModalOpen(false);
+    setSaleOrder(null)
+    setIsEditModalOpen(false)
   };
 
   const handleSelectChange = (event: SelectChangeEvent) => {
@@ -71,53 +95,38 @@ const NewOrders = () => {
     }
 
     try {
-      const newSaleOrder = await fs.saleOrder.create(form);
+      const newSaleOrder = await fs.saleOrder.update(form);
       const dbSaleOrders = await fs.saleOrder.getAll();
-
-      if (newSaleOrder?.cars?.length) {
-        for (let i = 0; i < newSaleOrder?.cars?.length; i++) {
-          const car: Car | undefined = myContext.cars.find((c) => c?.id === newSaleOrder.cars[i].carId);
-          if (car) {
-            const stock = car?.quantity || 0;
-            const result = stock - newSaleOrder.cars[i].quantity < 0 ? 0 : stock - newSaleOrder.cars[i].quantity;
-
-            await fs.cars.update(car?.id as string, { ...car, quantity: result });
-          }
-        }
-      }
-
-      const dbCars = await fs.cars.getAll();
-
-      if (!newSaleOrder || !dbSaleOrders || !dbCars) throw new Error('Error while creating client');
+      if (!newSaleOrder || !dbSaleOrders) throw new Error('Error while creating client');
       //Reset form
       setForm({
         clientId: '',
-        date: moment().format('YYYY-MM-DD HH:mm:ss'),
+        date: '',
         cars: [defaultCar],
         total: 0,
-        invoice: uuidv4(),
+        invoice: '',
         status: 'pending',
       });
       //Display success message
       setMyContext({
         ...myContext,
         saleOrders: dbSaleOrders,
-        cars: dbCars,
         snackbar: {
           open: true,
           severity: 'success',
-          msg: 'Orden de venta creada correctamente.',
+          msg: 'Orden de venta actualizada correctamente.',
         },
       });
       //Close providers modal
-      setIsModalOpen(false);
+      setSaleOrder(null)
+      setIsEditModalOpen(false)
     } catch (error) {
       setMyContext({
         ...myContext,
         snackbar: {
           open: true,
           severity: 'error',
-          msg: 'Ocurrio un problema al crear la order de venta, revisa tu datos.',
+          msg: 'Ocurrio un problema al actualizar la order de venta, revisa tu datos.',
         },
       });
     } finally {
@@ -126,19 +135,8 @@ const NewOrders = () => {
   };
 
   return (
-    <>
-      <Tooltip title="Agregar nueva venta" placement="left">
-        <Fab
-          color="primary"
-          aria-label="new sale order"
-          onClick={() => setIsModalOpen(true)}
-          sx={{ position: 'absolute', bottom: '2rem', right: '2rem' }}
-        >
-          <AddIcon />
-        </Fab>
-      </Tooltip>
       <Modal
-        open={isModalOpen}
+        open={isEditModalOpen}
         onClose={handleClose}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
@@ -171,7 +169,7 @@ const NewOrders = () => {
               <TextField
                 id="date"
                 name="date"
-                defaultValue={moment(form.date).locale('es').format('LLL')}
+                defaultValue={moment(saleOrder?.date).locale('es').format('LLL')}
                 label="Fecha de creación"
                 helperText="Fecha de creación de la order de compra"
                 variant="outlined"
@@ -179,6 +177,21 @@ const NewOrders = () => {
                 required
                 disabled
               />
+              <FormControl size="small" fullWidth>
+                <InputLabel id="status-select-label-id">Estado</InputLabel>
+                <Select
+                  labelId="status-select-label-id"
+                  id="status-select-id"
+                  value={form.status || ''}
+                  label="Estado"
+                  onChange={(event) => setForm(prev => ({...prev, status: event.target.value as any}))}
+                >
+                  <MenuItem value='pending'>Pendiente</MenuItem>
+                  <MenuItem value='completed'>Completada</MenuItem>
+                  <MenuItem value='rejected'>Rechazada</MenuItem>
+                </Select>
+                <FormHelperText>Selecciona al cliente</FormHelperText>
+              </FormControl>
               <FormControl size="small" fullWidth>
                 <InputLabel id="client-select-label-id">Cliente</InputLabel>
                 <Select
@@ -228,19 +241,17 @@ const NewOrders = () => {
               <Divider />
 
               <Button variant="contained" sx={{ marginRight: 'auto', width: '12rem' }} onClick={handleSubmit}>
-                {loading ? <CircularProgress size="1.9rem" sx={{ color: '#fff' }} /> : 'Registrar'}
+                {loading ? <CircularProgress size="1.9rem" sx={{ color: '#fff' }} /> : 'Editar'}
               </Button>
             </Stack>
           </form>
         </Stack>
       </Modal>
-    </>
   );
 };
 
 const OrderedCar = ({ car, idx, setForm }: OrderedCarProps) => {
   const { myContext } = useContext<MyContextState>(GlobalContext);
-  const maxQuantity = myContext.cars.find((dbCar) => dbCar.id === car.carId)?.quantity || 0;
 
   useEffect(() => {
     if (!car.carId || !car.quantity) {
@@ -295,7 +306,7 @@ const OrderedCar = ({ car, idx, setForm }: OrderedCarProps) => {
           label="Vehiculo"
           onChange={handleChange}
         >
-          {myContext.cars.filter(car => car.quantity > 0).map((car) => (
+          {myContext.cars.map((car) => (
             <MenuItem key={car.id} value={car.id}>{`${car.name} - ${car.company} - ${car.year}`}</MenuItem>
           ))}
         </Select>
@@ -307,7 +318,7 @@ const OrderedCar = ({ car, idx, setForm }: OrderedCarProps) => {
           id={`quantity-${idx}`}
           name="quantity"
           value={car.quantity}
-          InputProps={{ inputProps: { min: 0, max: maxQuantity } }}
+          inputProps={{ min: 0 }}
           onChange={handleQuantityChange}
           type="number"
           label="Cantidad"
@@ -339,6 +350,13 @@ const defaultCar: OrderedCarForSale = {
   quantity: 0,
   subTotal: 0,
 };
+
+interface Props {
+  isEditModalOpen: boolean; 
+  setIsEditModalOpen: Dispatch<SetStateAction<boolean>>;
+  saleOrder: SaleOrder | null; 
+  setSaleOrder: Dispatch<SetStateAction<SaleOrder | null>>;
+}
 
 interface OrderedCarProps {
   car: OrderedCarForSale;

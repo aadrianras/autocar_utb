@@ -98,8 +98,7 @@ const MenuLayout = ({ children }: { children: JSX.Element }) => {
 const pages = [
   { name: 'Compras', icon: InventoryIcon, url: '/dashboard/inventory' },
   { name: 'Ventas', icon: ReceiptIcon, url: '/dashboard/sells' },
-  { name: 'Taller', icon: CarRepairIcon, url: '/dashboard/repair' },
-  { name: 'RRHH', icon: GroupsIcon, url: '/dashboard/hr' },
+  { name: 'Taller', icon: CarRepairIcon, url: '/dashboard/workshop' },
 ];
 
 const LogoutConfirmationModal = ({ isLogoutConfirmationOpen, setIsLogoutConfirmationOpen }: ModalProps) => {
