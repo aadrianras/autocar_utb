@@ -53,7 +53,7 @@ const EditProvider = ({ isEditModalOpen, setIsEditModalOpen, provider, setProvid
         contactPhone: provider?.contactPhone || '',
       });
     }
-  }, [provider]);
+  }, [provider, form?.id]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setForm((form) => ({ ...form, [event.target.name]: event.target.value }));
@@ -196,7 +196,7 @@ const EditProvider = ({ isEditModalOpen, setIsEditModalOpen, provider, setProvid
                 </Select>
               </FormControl>
               <Button variant="contained" sx={{ marginRight: 'auto', width: '12rem' }} onClick={handleSubmit}>
-                {loading ? <CircularProgress size='1.9rem' sx={{ color: '#fff' }} /> : 'Editar'}
+                {loading ? <CircularProgress size="1.9rem" sx={{ color: '#fff' }} /> : 'Editar'}
               </Button>
             </Stack>
           </form>

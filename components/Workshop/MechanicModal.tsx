@@ -46,7 +46,7 @@ const MechanicModal = ({ repairedCar, setRepairedCar, isMechanicModalOpen, setIs
         repairs: repairedCar?.repairs || [],
       });
     }
-  }, [repairedCar]);
+  }, [repairedCar, form?.id]);
 
   const handleClose = () => {
     //Reset form

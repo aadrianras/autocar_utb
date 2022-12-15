@@ -61,7 +61,7 @@ const EditClient = ({ isEditModalOpen, setIsEditModalOpen, client, setClient }: 
         contactPhone: client?.contactPhone || '',
       });
     }
-  }, [client]);
+  }, [client, form?.id]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setForm((form) => ({ ...form, [event.target.name]: event.target.value }));

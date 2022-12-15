@@ -37,7 +37,7 @@ const EditRegisteredCar = ({ isEditModalOpen, setIsEditModalOpen, repairedCar, s
         repairs: repairedCar?.repairs || [],
       });
     }
-  }, [repairedCar]);
+  }, [repairedCar, form?.id]);
 
   const handleClose = () => {
     //Reset form

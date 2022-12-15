@@ -262,7 +262,7 @@ const OrderedCar = ({ car, idx, setForm }: OrderedCarProps) => {
         return { ...prev, cars: updatedCars };
       });
     }
-  }, [car.carId, car.quantity]);
+  }, [car.carId, car.quantity, car.profit, idx, myContext?.cars, setForm]);
 
   const handleChange = (event: SelectChangeEvent) => {
     setForm((prev) => {
@@ -295,9 +295,11 @@ const OrderedCar = ({ car, idx, setForm }: OrderedCarProps) => {
           label="Vehiculo"
           onChange={handleChange}
         >
-          {myContext.cars.filter(car => car.quantity > 0).map((car) => (
-            <MenuItem key={car.id} value={car.id}>{`${car.name} - ${car.company} - ${car.year}`}</MenuItem>
-          ))}
+          {myContext.cars
+            .filter((car) => car.quantity > 0)
+            .map((car) => (
+              <MenuItem key={car.id} value={car.id}>{`${car.name} - ${car.company} - ${car.year}`}</MenuItem>
+            ))}
         </Select>
       </FormControl>
 

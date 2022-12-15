@@ -3,11 +3,9 @@ import { Divider, FormHelperText } from '@mui/material';
 import { fs } from '../../../config/firebase';
 import { GlobalContext, MyContextState } from '../../../pages/_app';
 import { useState, useContext, useEffect, Dispatch, SetStateAction } from 'react';
-import AddIcon from '@mui/icons-material/Add';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import CloseIcon from '@mui/icons-material/Close';
-import Fab from '@mui/material/Fab';
 import FormControl from '@mui/material/FormControl';
 import IconButton from '@mui/material/IconButton';
 import InputLabel from '@mui/material/InputLabel';
@@ -16,13 +14,11 @@ import Modal from '@mui/material/Modal';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
-import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import 'moment/locale/es';
 import moment from 'moment';
 
-
-const NewOrders = ({isEditModalOpen, setIsEditModalOpen, saleOrder, setSaleOrder}: Props) => {
+const NewOrders = ({ isEditModalOpen, setIsEditModalOpen, saleOrder, setSaleOrder }: Props) => {
   const [loading, setLoading] = useState<boolean>(false);
   const { myContext, setMyContext } = useContext<MyContextState>(GlobalContext);
   const [form, setForm] = useState<SaleOrder>({
@@ -36,7 +32,7 @@ const NewOrders = ({isEditModalOpen, setIsEditModalOpen, saleOrder, setSaleOrder
   });
 
   useEffect(() => {
-    if(saleOrder) {
+    if (saleOrder) {
       setForm({
         id: saleOrder?.id || '',
         clientId: saleOrder?.clientId || '',
@@ -45,7 +41,7 @@ const NewOrders = ({isEditModalOpen, setIsEditModalOpen, saleOrder, setSaleOrder
         total: saleOrder?.total || 0,
         invoice: saleOrder?.invoice || '',
         status: saleOrder?.status || 'pending',
-      })
+      });
     } else {
       setForm({
         id: '',
@@ -55,9 +51,9 @@ const NewOrders = ({isEditModalOpen, setIsEditModalOpen, saleOrder, setSaleOrder
         total: 0,
         invoice: '',
         status: 'pending',
-      })
+      });
     }
-  }, [saleOrder])
+  }, [saleOrder]);
 
   const handleClose = () => {
     //Reset form
@@ -69,8 +65,8 @@ const NewOrders = ({isEditModalOpen, setIsEditModalOpen, saleOrder, setSaleOrder
       invoice: '',
       status: 'pending',
     });
-    setSaleOrder(null)
-    setIsEditModalOpen(false)
+    setSaleOrder(null);
+    setIsEditModalOpen(false);
   };
 
   const handleSelectChange = (event: SelectChangeEvent) => {
@@ -118,8 +114,8 @@ const NewOrders = ({isEditModalOpen, setIsEditModalOpen, saleOrder, setSaleOrder
         },
       });
       //Close providers modal
-      setSaleOrder(null)
-      setIsEditModalOpen(false)
+      setSaleOrder(null);
+      setIsEditModalOpen(false);
     } catch (error) {
       setMyContext({
         ...myContext,
@@ -135,118 +131,118 @@ const NewOrders = ({isEditModalOpen, setIsEditModalOpen, saleOrder, setSaleOrder
   };
 
   return (
-      <Modal
-        open={isEditModalOpen}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-        sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+    <Modal
+      open={isEditModalOpen}
+      onClose={handleClose}
+      aria-labelledby="modal-modal-title"
+      aria-describedby="modal-modal-description"
+      sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+    >
+      <Stack
+        alignItems="stretch"
+        gap="1rem"
+        sx={{
+          backgroundColor: '#fff',
+          padding: 'clamp(.5rem, 2.5vw, 3rem)',
+          borderRadius: '.25rem',
+          width: '100%',
+          maxWidth: '35rem',
+          overflowY: 'auto',
+          height: { xs: '100%', md: 'max-content' },
+          maxHeight: { xs: '100%', md: '90%' },
+        }}
       >
-        <Stack
-          alignItems="stretch"
-          gap="1rem"
-          sx={{
-            backgroundColor: '#fff',
-            padding: 'clamp(.5rem, 2.5vw, 3rem)',
-            borderRadius: '.25rem',
-            width: '100%',
-            maxWidth: '35rem',
-            overflowY: 'auto',
-            height: { xs: '100%', md: 'max-content' },
-            maxHeight: { xs: '100%', md: '90%' },
-          }}
-        >
-          <Stack direction="row" justifyContent="space-between" alignItems="center">
-            <Typography id="modal-modal-title" variant="h6" component="h2">
-              Nueva orden de venta
-            </Typography>
-            <IconButton aria-label="Cerrar nueva venta" onClick={handleClose} sx={{ borderRadius: '.25rem' }}>
-              <CloseIcon />
-            </IconButton>
-          </Stack>
-          <form>
-            <Stack alignItems="stretch" gap="1rem">
-              <TextField
-                id="date"
-                name="date"
-                defaultValue={moment(saleOrder?.date).locale('es').format('LLL')}
-                label="Fecha de creación"
-                helperText="Fecha de creación de la order de compra"
-                variant="outlined"
-                size="small"
-                required
-                disabled
-              />
-              <FormControl size="small" fullWidth>
-                <InputLabel id="status-select-label-id">Estado</InputLabel>
-                <Select
-                  labelId="status-select-label-id"
-                  id="status-select-id"
-                  value={form.status || ''}
-                  label="Estado"
-                  onChange={(event) => setForm(prev => ({...prev, status: event.target.value as any}))}
-                >
-                  <MenuItem value='pending'>Pendiente</MenuItem>
-                  <MenuItem value='completed'>Completada</MenuItem>
-                  <MenuItem value='rejected'>Rechazada</MenuItem>
-                </Select>
-                <FormHelperText>Selecciona al cliente</FormHelperText>
-              </FormControl>
-              <FormControl size="small" fullWidth>
-                <InputLabel id="client-select-label-id">Cliente</InputLabel>
-                <Select
-                  labelId="client-select-label-id"
-                  id="client-select-id"
-                  value={myContext.clients.find((client) => client.id === form.clientId)?.id || ''}
-                  label="Cliente"
-                  onChange={handleSelectChange}
-                >
-                  {myContext.clients.map((client) => (
-                    <MenuItem key={client.id} value={client.id}>
-                      {`${client.firstName} ${client.lastName}`}
-                    </MenuItem>
-                  ))}
-                </Select>
-                <FormHelperText>Selecciona al cliente</FormHelperText>
-              </FormControl>
-
-              <Button
-                sx={{ marginLeft: 'auto' }}
-                onClick={() => {
-                  setForm((prev) => ({ ...prev, cars: [...prev.cars, defaultCar] }));
-                }}
-              >
-                + Agregar vehiculo
-              </Button>
-
-              {form.cars.map((car, idx) => (
-                <OrderedCar key={idx} car={car} idx={idx} setForm={setForm} />
-              ))}
-
-              <Divider />
-
-              <TextField
-                sx={{ flex: '0 1 auto' }}
-                id={`Total`}
-                name="Total"
-                type="number"
-                value={form.total}
-                label="Total ($us)"
-                variant="outlined"
-                size="small"
-                disabled
-                required
-              />
-
-              <Divider />
-
-              <Button variant="contained" sx={{ marginRight: 'auto', width: '12rem' }} onClick={handleSubmit}>
-                {loading ? <CircularProgress size="1.9rem" sx={{ color: '#fff' }} /> : 'Editar'}
-              </Button>
-            </Stack>
-          </form>
+        <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            Nueva orden de venta
+          </Typography>
+          <IconButton aria-label="Cerrar nueva venta" onClick={handleClose} sx={{ borderRadius: '.25rem' }}>
+            <CloseIcon />
+          </IconButton>
         </Stack>
-      </Modal>
+        <form>
+          <Stack alignItems="stretch" gap="1rem">
+            <TextField
+              id="date"
+              name="date"
+              defaultValue={moment(saleOrder?.date).locale('es').format('LLL')}
+              label="Fecha de creación"
+              helperText="Fecha de creación de la order de compra"
+              variant="outlined"
+              size="small"
+              required
+              disabled
+            />
+            <FormControl size="small" fullWidth>
+              <InputLabel id="status-select-label-id">Estado</InputLabel>
+              <Select
+                labelId="status-select-label-id"
+                id="status-select-id"
+                value={form.status || ''}
+                label="Estado"
+                onChange={(event) => setForm((prev) => ({ ...prev, status: event.target.value as any }))}
+              >
+                <MenuItem value="pending">Pendiente</MenuItem>
+                <MenuItem value="completed">Completada</MenuItem>
+                <MenuItem value="rejected">Rechazada</MenuItem>
+              </Select>
+              <FormHelperText>Selecciona al cliente</FormHelperText>
+            </FormControl>
+            <FormControl size="small" fullWidth>
+              <InputLabel id="client-select-label-id">Cliente</InputLabel>
+              <Select
+                labelId="client-select-label-id"
+                id="client-select-id"
+                value={myContext.clients.find((client) => client.id === form.clientId)?.id || ''}
+                label="Cliente"
+                onChange={handleSelectChange}
+              >
+                {myContext.clients.map((client) => (
+                  <MenuItem key={client.id} value={client.id}>
+                    {`${client.firstName} ${client.lastName}`}
+                  </MenuItem>
+                ))}
+              </Select>
+              <FormHelperText>Selecciona al cliente</FormHelperText>
+            </FormControl>
+
+            <Button
+              sx={{ marginLeft: 'auto' }}
+              onClick={() => {
+                setForm((prev) => ({ ...prev, cars: [...prev.cars, defaultCar] }));
+              }}
+            >
+              + Agregar vehiculo
+            </Button>
+
+            {form.cars.map((car, idx) => (
+              <OrderedCar key={idx} car={car} idx={idx} setForm={setForm} />
+            ))}
+
+            <Divider />
+
+            <TextField
+              sx={{ flex: '0 1 auto' }}
+              id={`Total`}
+              name="Total"
+              type="number"
+              value={form.total}
+              label="Total ($us)"
+              variant="outlined"
+              size="small"
+              disabled
+              required
+            />
+
+            <Divider />
+
+            <Button variant="contained" sx={{ marginRight: 'auto', width: '12rem' }} onClick={handleSubmit}>
+              {loading ? <CircularProgress size="1.9rem" sx={{ color: '#fff' }} /> : 'Editar'}
+            </Button>
+          </Stack>
+        </form>
+      </Stack>
+    </Modal>
   );
 };
 
@@ -273,7 +269,7 @@ const OrderedCar = ({ car, idx, setForm }: OrderedCarProps) => {
         return { ...prev, cars: updatedCars };
       });
     }
-  }, [car.carId, car.quantity]);
+  }, [car.carId, car.quantity, car.profit, idx, myContext?.cars, setForm]);
 
   const handleChange = (event: SelectChangeEvent) => {
     setForm((prev) => {
@@ -352,9 +348,9 @@ const defaultCar: OrderedCarForSale = {
 };
 
 interface Props {
-  isEditModalOpen: boolean; 
+  isEditModalOpen: boolean;
   setIsEditModalOpen: Dispatch<SetStateAction<boolean>>;
-  saleOrder: SaleOrder | null; 
+  saleOrder: SaleOrder | null;
   setSaleOrder: Dispatch<SetStateAction<SaleOrder | null>>;
 }
 

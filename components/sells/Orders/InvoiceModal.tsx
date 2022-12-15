@@ -88,7 +88,7 @@ const InvoiceModal = ({ isInvoiceModalOpen, setIsInvoiceModalOpen, saleOrder, se
           const dbCar = myContext.cars.find((c) => c.id === car.carId);
 
           return (
-            <Typography id="modal-modal-title" variant="body1" component="h2">
+            <Typography key={idx} id="modal-modal-title" variant="body1" component="h2">
               {`${idx + 1}.- ${dbCar?.name} año ${dbCar?.year} - ${car.quantity} unidades - $us ${car.subTotal}`}
             </Typography>
           );
